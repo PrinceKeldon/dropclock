@@ -407,6 +407,11 @@ def layout(lang, page, title, desc, body, script=""):
 <meta property="og:description" content="{escape(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{canonical}">
+<meta property="og:site_name" content="{BRAND}">
+<meta property="og:image" content="{SITE_URL}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <style>{CSS}</style>
 </head>
 <body>
@@ -566,6 +571,8 @@ def main():
         write(path_for(lang, "hw"), hw_page(lang))
     write("/sitemap.xml", sitemap())
     write("/robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
+    if os.path.isdir("static"):
+        shutil.copytree("static", "dist", dirs_exist_ok=True)
     if GOOGLE_VERIFICATION_FILE:
         write("/" + GOOGLE_VERIFICATION_FILE, "google-site-verification: " + GOOGLE_VERIFICATION_FILE)
     pages = len(LANG_ORDER) * 2
