@@ -31,6 +31,9 @@ AFFILIATE_TAGS = {
     "amazon.pl": "dropclock-21",
     "amazon.nl": "dropclock-21",
 }
+
+# Google Search Console ownership file, served at /<name> (HTML-file verification).
+GOOGLE_VERIFICATION_FILE = "googleae33614df66708bc.html"
 # -----------------------------------------------------------------------------
 
 LANG_ORDER = ["en", "de", "fr", "es", "it", "pl", "nl", "ar"]
@@ -507,6 +510,8 @@ def main():
         write(path_for(lang, "hw"), hw_page(lang))
     write("/sitemap.xml", sitemap())
     write("/robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
+    if GOOGLE_VERIFICATION_FILE:
+        write("/" + GOOGLE_VERIFICATION_FILE, "google-site-verification: " + GOOGLE_VERIFICATION_FILE)
     pages = len(LANG_ORDER) * 2
     print(f"Built {pages} pages in ./dist")
     if "example.com" in SITE_URL:
