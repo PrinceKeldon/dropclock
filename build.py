@@ -13,7 +13,7 @@ from html import escape
 from urllib.parse import quote_plus
 
 # ----------------------------- CONFIG ---------------------------------------
-SITE_URL = "https://example.com"      # your domain, no trailing slash
+SITE_URL = "https://dropclock.live"     # your domain, no trailing slash
 BRAND = "DropClock"                    # neutral brand, no game trademarks
 UNLOCK_UTC = None                     # e.g. "2026-11-19T05:00:00Z" once officially confirmed
 TARGET_LOCAL = "2026-11-19T00:00:00"  # fallback assumption: local midnight
