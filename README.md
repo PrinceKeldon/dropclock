@@ -16,15 +16,18 @@ Arabic (RTL). No server, no dependencies beyond Python 3.
 5. **Submit `https://yourdomain.com/sitemap.xml`** in Google Search Console and
    Bing Webmaster Tools. This is what gets the pages indexed quickly.
 
-## Affiliate accounts
+## Affiliate setup
 
-Amazon Associates is a separate sign-up per store. You need accounts for:
-amazon.de, amazon.fr, amazon.es, amazon.it, amazon.pl, amazon.nl and amazon.ae.
-Verify that each store's program is open to your country of residence before
-relying on it. Sign-up for each store can take a while, so start with .de and .ae,
-which are the biggest of your markets.
+All links use the Amazon Associates store ID `dropclock-21`, which is active for
+amazon.de, .fr, .es, .it, .nl, .pl, .com, .co.uk and .ca in the account.
 
-Each page carries the affiliate disclosure Amazon and EU rules expect.
+- German, French, Spanish, Italian, Dutch and Polish pages link to their own store.
+- The English page picks .co.uk, .ca or .com from the visitor's time zone.
+- The Arabic page has no buy links: amazon.ae needs a separate Associates
+  account (UAE/Egypt address). Add its tag to `AFFILIATE_TAGS["amazon.ae"]` to
+  switch them on. Any store with a `YOURTAG-*` placeholder shows no buy links.
+
+Each guide page carries the affiliate disclosure Amazon and EU rules expect.
 Do not remove it.
 
 ## When Rockstar announces one official unlock time

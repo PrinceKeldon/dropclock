@@ -20,7 +20,10 @@ TARGET_LOCAL = "2026-11-19T00:00:00"  # fallback assumption: local midnight
 
 # One Amazon Associates tracking ID per store. Replace the placeholders.
 AFFILIATE_TAGS = {
-    "amazon.ae": "YOURTAG-AE",
+    "amazon.ae": "YOURTAG-AE",   # needs a UAE/Egypt address, skipped for now
+    "amazon.com": "dropclock-21",
+    "amazon.co.uk": "dropclock-21",
+    "amazon.ca": "dropclock-21",
     "amazon.de": "dropclock-21",
     "amazon.fr": "dropclock-21",
     "amazon.es": "dropclock-21",
@@ -32,7 +35,7 @@ AFFILIATE_TAGS = {
 
 LANG_ORDER = ["en", "de", "fr", "es", "it", "pl", "nl", "ar"]
 STORE = {
-    "en": "amazon.ae", "ar": "amazon.ae", "de": "amazon.de", "fr": "amazon.fr",
+    "en": "amazon.com", "ar": "amazon.ae", "de": "amazon.de", "fr": "amazon.fr",
     "es": "amazon.es", "it": "amazon.it", "pl": "amazon.pl", "nl": "amazon.nl",
 }
 NATIVE = {
@@ -395,7 +398,7 @@ def hw_page(lang):
     t = T[lang]
     specs = "".join(f"<li>{escape(s)}</li>" for s in t["specs"])
     btns = "".join(
-        f'<a class="btn" rel="sponsored nofollow noopener" target="_blank" href="{escape(affiliate_url(lang, q))}">{escape(label)}</a>'
+        f'<a class="btn" rel="sponsored nofollow noopener" target="_blank" data-q="{escape(q)}" href="{escape(affiliate_url(lang, q))}">{escape(label)}</a>'
         for label, q in zip(t["buy"], t["queries"])
     )
     tag = AFFILIATE_TAGS[STORE[lang]]
@@ -415,8 +418,27 @@ def hw_page(lang):
 <p>{escape(t["xbox"])}</p>
 {buy_block}
 """
-    return layout(lang, "hw", t["hw_title"], t["hw_desc"], body)
+    script = ""
+    if lang == "en" and buy_block:
+        cfg = json.dumps({"tags": {d: AFFILIATE_TAGS[d] for d in ("amazon.com", "amazon.co.uk", "amazon.ca")}})
+        script = "<script>window.__CFG=" + cfg + ";" + STORE_JS + "</script>"
+    return layout(lang, "hw", t["hw_title"], t["hw_desc"], body, script)
 
+
+STORE_JS = """
+(function(){
+var C=window.__CFG,tz="";
+try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||"";}catch(e){}
+var d="amazon.com";
+if(/^Europe\\/(London|Belfast|Jersey|Guernsey|Isle_of_Man)$/.test(tz)){d="amazon.co.uk";}
+else if(/^America\\/(Toronto|Vancouver|Edmonton|Winnipeg|Halifax|St_Johns|Regina|Montreal|Moncton|Glace_Bay|Iqaluit|Whitehorse|Yellowknife|Swift_Current|Goose_Bay|Dawson|Dawson_Creek|Fort_Nelson|Cambridge_Bay|Inuvik|Rankin_Inlet|Resolute|Atikokan|Blanc-Sablon)$/.test(tz)){d="amazon.ca";}
+var links=document.querySelectorAll("a[data-q]");
+for(var i=0;i<links.length;i++){
+  var q=links[i].getAttribute("data-q");
+  links[i].setAttribute("href","https://www."+d+"/s?k="+encodeURIComponent(q).replace(/%20/g,"+")+"&tag="+C.tags[d]);
+}
+})();
+"""
 
 COUNTDOWN_JS = """
 (function(){
