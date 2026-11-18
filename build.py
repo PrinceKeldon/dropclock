@@ -21,10 +21,10 @@ TARGET_LOCAL = "2026-11-19T00:00:00"  # fallback assumption: local midnight
 # One Amazon Associates tracking ID per store. Replace the placeholders.
 AFFILIATE_TAGS = {
     "amazon.ae": "YOURTAG-AE",
-    "amazon.de": "YOURTAG-DE",
-    "amazon.fr": "YOURTAG-FR",
-    "amazon.es": "YOURTAG-ES",
-    "amazon.it": "YOURTAG-IT",
+    "amazon.de": "dropclock-21",
+    "amazon.fr": "dropclock-21",
+    "amazon.es": "dropclock-21",
+    "amazon.it": "dropclock-21",
     "amazon.pl": "YOURTAG-PL",
     "amazon.nl": "YOURTAG-NL",
 }
@@ -398,15 +398,22 @@ def hw_page(lang):
         f'<a class="btn" rel="sponsored nofollow noopener" target="_blank" href="{escape(affiliate_url(lang, q))}">{escape(label)}</a>'
         for label, q in zip(t["buy"], t["queries"])
     )
+    tag = AFFILIATE_TAGS[STORE[lang]]
+    if tag.startswith("YOURTAG"):
+        buy_block = ""  # no working affiliate tag for this store yet: hide links
+    else:
+        buy_block = (
+            f'<h2>{escape(t["buy_h"])}</h2>'
+            f'<div class="btns">{btns}</div>'
+            f'<p class="small">{escape(t["disclosure"])}</p>'
+        )
     body = f"""
 <h1>{escape(t["hw_h1"])}</h1>
 <p class="sub">{escape(t["hw_intro"])}</p>
 <h2>{escape(t["specs_h"])}</h2>
 <ul class="specs">{specs}</ul>
 <p>{escape(t["xbox"])}</p>
-<h2>{escape(t["buy_h"])}</h2>
-<div class="btns">{btns}</div>
-<p class="small">{escape(t["disclosure"])}</p>
+{buy_block}
 """
     return layout(lang, "hw", t["hw_title"], t["hw_desc"], body)
 
@@ -482,7 +489,7 @@ def main():
     if "example.com" in SITE_URL:
         print("WARNING: SITE_URL is still example.com - set your domain before deploying.")
     if any(v.startswith("YOURTAG") for v in AFFILIATE_TAGS.values()):
-        print("WARNING: affiliate tags are placeholders - replace them with your Associates IDs.")
+        print("NOTE: stores with placeholder tags (YOURTAG-*) show no buy links until you set a real tag.")
 
 
 if __name__ == "__main__":
