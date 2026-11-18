@@ -284,31 +284,57 @@ T = {
 }
 
 CSS = """
-:root{--bg:#0f1115;--card:#171a21;--fg:#eef0f4;--mut:#9aa3b2;--acc:#ff5d8f;--line:#262b36}
+:root{--bg:#14061f;--ink:#fff3f8;--mut:#c9b3dc;--flamingo:#ff4f8b;--orange:#ff9a3c;--teal:#28d9c8;--line:rgba(255,79,139,.3)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",sans-serif}
-.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:8px 0 16px;border-bottom:1px solid var(--line)}
-.brand{font-weight:700;letter-spacing:.02em}
-nav a,.langs a{color:var(--mut);text-decoration:none;margin-inline-end:14px}
-nav a.on,.langs a.on{color:var(--fg);font-weight:600}
-h1{font-size:clamp(1.6rem,5vw,2.3rem);line-height:1.2;margin:28px 0 8px}
-.sub{color:var(--mut);margin:0 0 20px}
-.note{background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--acc);padding:12px 14px;border-radius:8px;color:var(--mut);font-size:.95rem}
-.cd{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:24px 0}
-.cd div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 4px;text-align:center}
-.cd b{display:block;font-size:clamp(1.6rem,7vw,2.6rem);font-variant-numeric:tabular-nums}
-.cd span{color:var(--mut);font-size:.8rem}
-.out{font-size:1.8rem;font-weight:700;text-align:center;margin:24px 0}
-table{width:100%;border-collapse:collapse;margin:12px 0 24px}
-th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:start}
-th{color:var(--mut);font-weight:500;font-size:.9rem}
+[hidden]{display:none!important}
+html{color-scheme:dark}
+body{margin:0;background:radial-gradient(900px 420px at 50% -60px,#4a1260 0%,rgba(20,6,31,0) 70%),var(--bg);color:var(--ink);font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:18px 16px 56px}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:6px}
+header{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
+.brand{font:italic 900 1.45rem/1 "Arial Black","Helvetica Neue",Arial,sans-serif;letter-spacing:-.02em}
+.brand::before{content:"";display:inline-block;width:.8em;height:.8em;margin-inline-end:.45em;border-radius:50%;background:linear-gradient(180deg,#ffe38a,#ff4f8b);vertical-align:-.05em}
+nav a,.langs a{color:var(--mut);text-decoration:none;margin-inline-end:16px}
+nav a:hover,.langs a:hover{color:var(--ink)}
+nav a.on,.langs a.on{color:var(--ink);font-weight:700;box-shadow:inset 0 -2px 0 var(--flamingo)}
+.langs{display:flex;flex-wrap:wrap;gap:6px 0;padding:12px 0 0;font-size:.92rem}
+.hero{position:relative;height:220px;margin:14px 0 0;overflow:hidden;border-radius:18px;background:linear-gradient(180deg,#16062b 0%,#58135f 48%,#ff4f8b 86%,#ffa95c 100%);box-shadow:0 18px 50px rgba(255,79,139,.18)}
+.hero.small{height:120px}
+.sun{position:absolute;left:50%;bottom:46px;width:170px;height:170px;margin-left:-85px;border-radius:50%;background:linear-gradient(180deg,#ffe38a 0%,#ffb347 42%,#ff4f8b 100%);box-shadow:0 0 70px rgba(255,120,150,.75);-webkit-mask-image:linear-gradient(#000 0 52%,transparent 52% 56%,#000 56% 63%,transparent 63% 68%,#000 68% 75%,transparent 75% 81%,#000 81% 88%,transparent 88% 95%,#000 95%);mask-image:linear-gradient(#000 0 52%,transparent 52% 56%,#000 56% 63%,transparent 63% 68%,#000 68% 75%,transparent 75% 81%,#000 81% 88%,transparent 88% 95%,#000 95%);animation:rise 1.4s cubic-bezier(.2,.7,.2,1) both}
+.hero.small .sun{width:100px;height:100px;margin-left:-50px;bottom:28px}
+@keyframes rise{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+.floor{position:absolute;left:0;right:0;bottom:0;height:48px;background:#14061f;overflow:hidden;border-top:1px solid rgba(255,79,139,.7)}
+.hero.small .floor{height:30px}
+.floor::before{content:"";position:absolute;left:-50%;right:-50%;top:0;height:300%;background-image:linear-gradient(rgba(255,79,139,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,79,139,.6) 1px,transparent 1px);background-size:40px 40px;transform:perspective(120px) rotateX(60deg);transform-origin:top center;animation:grid 4s linear infinite}
+@keyframes grid{to{background-position:0 40px}}
+.palm{position:absolute;bottom:22px;height:150px;width:auto;color:#07020f}
+.hero.small .palm{height:84px;bottom:14px}
+.palm.l{left:7%}
+.palm.r{right:7%;transform:scaleX(-1)}
+h1{font:italic 900 clamp(2rem,6.5vw,3.2rem)/1.05 "Arial Black","Helvetica Neue",Arial,sans-serif;letter-spacing:-.03em;margin:30px 0 10px}
+h2{font-size:1.25rem;margin:30px 0 8px}
+html[lang=ar] h1,html[lang=ar] .brand,html[lang=ar] .cd b,html[lang=ar] .out{font-family:system-ui,"Noto Sans Arabic",sans-serif;font-style:normal;letter-spacing:0}
+.sub{color:var(--mut);margin:0 0 20px;max-width:62ch}
+.note{border-inline-start:4px solid var(--flamingo);padding:10px 14px;background:rgba(255,79,139,.08);border-start-end-radius:10px;border-end-end-radius:10px;color:var(--mut);font-size:.95rem;max-width:68ch}
+.cd{display:grid;grid-template-columns:repeat(4,1fr);margin:26px 0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));box-shadow:0 0 28px rgba(255,79,139,.16)}
+.cd div{padding:16px 4px 12px;text-align:center}
+.cd div+div{border-inline-start:1px solid var(--line)}
+.cd b{display:block;font:italic 900 clamp(2rem,9vw,3.4rem)/1.05 "Arial Black","Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#ffe38a,#ff4f8b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cd span{color:var(--mut);font-size:.85rem}
+.out{font:italic 900 2rem/1.2 "Arial Black","Helvetica Neue",Arial,sans-serif;text-align:center;margin:26px 0}
+table{width:100%;border-collapse:collapse;margin:14px 0 26px}
+th,td{padding:11px 8px;border-bottom:1px solid var(--line);text-align:start}
+th{color:var(--teal);font-weight:600;font-size:.9rem}
+tbody tr:last-child td{border-bottom:0}
 ul.specs{padding-inline-start:20px}
 ul.specs li{margin:8px 0}
 .btns{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
-.btn{background:var(--acc);color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:600}
+.btn{display:inline-block;background:linear-gradient(90deg,var(--flamingo),var(--orange));color:#1c0626;text-decoration:none;padding:12px 18px;border-radius:999px;font-weight:800;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,79,139,.35)}
 .small{color:var(--mut);font-size:.85rem}
 footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line)}
+@media (max-width:520px){.hero{height:180px}.sun{width:140px;height:140px;margin-left:-70px;bottom:40px}.palm{height:120px}}
+@media (prefers-reduced-motion:reduce){.sun,.floor::before{animation:none}.btn{transition:none}}
 """
 
 
@@ -320,6 +346,33 @@ def path_for(lang, page):
 def affiliate_url(lang, query):
     domain = STORE[lang]
     return f"https://www.{domain}/s?k={quote_plus(query)}&tag={AFFILIATE_TAGS[domain]}"
+
+
+PALM_SYMBOL = (
+    '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="palm" viewBox="0 0 120 220">'
+    '<path d="M62 220 C 60 160, 66 110, 60 60" stroke="currentColor" stroke-width="7" fill="none" stroke-linecap="round"/>'
+    '<g stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round">'
+    '<path d="M60 60 C 40 40, 15 40, 0 62"/><path d="M60 60 C 45 30, 25 18, 5 22"/>'
+    '<path d="M60 60 C 58 30, 62 12, 74 0"/><path d="M60 60 C 80 38, 105 38, 120 60"/>'
+    '<path d="M60 60 C 75 30, 95 18, 115 22"/><path d="M60 60 C 50 45, 35 50, 25 75"/>'
+    '<path d="M60 60 C 72 48, 88 52, 98 76"/></g></symbol></svg>'
+)
+FAVICON = (
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
+    "%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffe38a'/%3E"
+    "%3Cstop offset='1' stop-color='%23ff4f8b'/%3E%3C/linearGradient%3E%3C/defs%3E"
+    "%3Ccircle cx='16' cy='16' r='14' fill='url(%23g)'/%3E%3C/svg%3E"
+)
+
+
+def hero(page):
+    size = "" if page == "home" else " small"
+    return (
+        PALM_SYMBOL
+        + '<div class="hero' + size + '" aria-hidden="true"><div class="sun"></div><div class="floor"></div>'
+        '<svg class="palm l" viewBox="0 0 120 220"><use href="#palm"/></svg>'
+        '<svg class="palm r" viewBox="0 0 120 220"><use href="#palm"/></svg></div>'
+    )
 
 
 def layout(lang, page, title, desc, body, script=""):
@@ -347,6 +400,8 @@ def layout(lang, page, title, desc, body, script=""):
 <title>{escape(title)} | {BRAND}</title>
 <meta name="description" content="{escape(desc)}">
 <link rel="canonical" href="{canonical}">
+<link rel="icon" href="{FAVICON}">
+<meta name="theme-color" content="#14061f">
 {alts}
 <meta property="og:title" content="{escape(title)}">
 <meta property="og:description" content="{escape(desc)}">
@@ -357,7 +412,8 @@ def layout(lang, page, title, desc, body, script=""):
 <body>
 <div class="wrap">
 <header><span class="brand">{BRAND}</span><nav>{nav}</nav></header>
-<div class="langs" style="padding:10px 0">{langs}</div>
+<div class="langs">{langs}</div>
+{hero(page)}
 {body}
 <footer class="small">{escape(t["footer"])}</footer>
 </div>
