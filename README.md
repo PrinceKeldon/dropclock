@@ -22,7 +22,7 @@ All links use the Amazon Associates store ID `dropclock-21`, which is active for
 amazon.de, .fr, .es, .it, .nl, .pl, .com, .co.uk and .ca in the account.
 
 - German, French, Spanish, Italian, Dutch and Polish pages link to their own store.
-- The English page picks .co.uk, .ca or .com from the visitor's time zone.
+- The English page picks .co.uk, .ca, .de (EU time zones) or .com from the visitor's time zone.
 - The Arabic page has no buy links: amazon.ae needs a separate Associates
   account (UAE/Egypt address). Add its tag to `AFFILIATE_TAGS["amazon.ae"]` to
   switch them on. Any store with a `YOURTAG-*` placeholder shows no buy links.

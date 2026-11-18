@@ -420,7 +420,7 @@ def hw_page(lang):
 """
     script = ""
     if lang == "en" and buy_block:
-        cfg = json.dumps({"tags": {d: AFFILIATE_TAGS[d] for d in ("amazon.com", "amazon.co.uk", "amazon.ca")}})
+        cfg = json.dumps({"tags": {d: AFFILIATE_TAGS[d] for d in ("amazon.com", "amazon.co.uk", "amazon.ca", "amazon.de")}})
         script = "<script>window.__CFG=" + cfg + ";" + STORE_JS + "</script>"
     return layout(lang, "hw", t["hw_title"], t["hw_desc"], body, script)
 
@@ -432,6 +432,7 @@ try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||"";}catch(e){}
 var d="amazon.com";
 if(/^Europe\\/(London|Belfast|Jersey|Guernsey|Isle_of_Man)$/.test(tz)){d="amazon.co.uk";}
 else if(/^America\\/(Toronto|Vancouver|Edmonton|Winnipeg|Halifax|St_Johns|Regina|Montreal|Moncton|Glace_Bay|Iqaluit|Whitehorse|Yellowknife|Swift_Current|Goose_Bay|Dawson|Dawson_Creek|Fort_Nelson|Cambridge_Bay|Inuvik|Rankin_Inlet|Resolute|Atikokan|Blanc-Sablon)$/.test(tz)){d="amazon.ca";}
+else if(/^(Europe\\/(Berlin|Busingen|Paris|Madrid|Rome|Amsterdam|Brussels|Luxembourg|Vienna|Warsaw|Prague|Bratislava|Budapest|Ljubljana|Zagreb|Lisbon|Dublin|Athens|Nicosia|Sofia|Bucharest|Helsinki|Stockholm|Copenhagen|Tallinn|Riga|Vilnius|Malta)|Atlantic\\/(Canary|Madeira|Azores))$/.test(tz)){d="amazon.de";}
 var links=document.querySelectorAll("a[data-q]");
 for(var i=0;i<links.length;i++){
   var q=links[i].getAttribute("data-q");
