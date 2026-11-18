@@ -25,8 +25,8 @@ AFFILIATE_TAGS = {
     "amazon.fr": "dropclock-21",
     "amazon.es": "dropclock-21",
     "amazon.it": "dropclock-21",
-    "amazon.pl": "YOURTAG-PL",
-    "amazon.nl": "YOURTAG-NL",
+    "amazon.pl": "dropclock-21",
+    "amazon.nl": "dropclock-21",
 }
 # -----------------------------------------------------------------------------
 
