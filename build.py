@@ -15,8 +15,6 @@ from urllib.parse import quote_plus
 # ----------------------------- CONFIG ---------------------------------------
 SITE_URL = "https://dropclock.live"     # your domain, no trailing slash
 BRAND = "DropClock"                    # neutral brand, no game trademarks
-UNLOCK_UTC = None                     # e.g. "2026-11-19T05:00:00Z" once officially confirmed
-TARGET_LOCAL = "2026-11-19T00:00:00"  # fallback assumption: local midnight
 
 # One Amazon Associates tracking ID per store. Replace the placeholders.
 AFFILIATE_TAGS = {
@@ -36,6 +34,15 @@ AFFILIATE_TAGS = {
 GOOGLE_VERIFICATION_FILE = "googleae33614df66708bc.html"
 # -----------------------------------------------------------------------------
 
+# Game data lives in games.json (featured game, release date, unlock time, sources).
+with open("games.json", encoding="utf-8") as _f:
+    DATA = json.load(_f)
+GAME = next(g for g in DATA["games"] if g["slug"] == DATA["featured"])
+UNLOCK_UTC = GAME["unlock"].get("utc")        # set to e.g. "2026-11-19T05:00:00Z" once one official time exists
+TARGET_LOCAL = GAME["unlock"]["local"]
+SRC = {x["key"]: x for x in GAME["sources"]}
+PAGES = ("home", "hw", "size", "help")
+
 LANG_ORDER = ["en", "de", "fr", "es", "it", "pl", "nl", "ar"]
 STORE = {
     "en": "amazon.com", "ar": "amazon.ae", "de": "amazon.de", "fr": "amazon.fr",
@@ -48,17 +55,38 @@ NATIVE = {
 CITY_TZ = ["Europe/Berlin", "Europe/Paris", "Europe/Madrid", "Europe/Rome",
            "Europe/Warsaw", "Europe/Amsterdam", "Asia/Dubai"]
 
+
+MONTHS = {
+    "en": "January February March April May June July August September October November December".split(),
+    "de": "Januar Februar März April Mai Juni Juli August September Oktober November Dezember".split(),
+    "fr": "janvier février mars avril mai juin juillet août septembre octobre novembre décembre".split(),
+    "es": "enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre".split(),
+    "it": "gennaio febbraio marzo aprile maggio giugno luglio agosto settembre ottobre novembre dicembre".split(),
+    "pl": "stycznia lutego marca kwietnia maja czerwca lipca sierpnia września października listopada grudnia".split(),
+    "nl": "januari februari maart april mei juni juli augustus september oktober november december".split(),
+    "ar": "يناير فبراير مارس أبريل مايو يونيو يوليو أغسطس سبتمبر أكتوبر نوفمبر ديسمبر".split(),
+}
+DATE_FMT = {
+    "en": "{m} {d}, {y}", "de": "{d}. {m} {y}", "fr": "{d} {m} {y}", "es": "{d} de {m} de {y}",
+    "it": "{d} {m} {y}", "pl": "{d} {m} {y}", "nl": "{d} {m} {y}", "ar": "{d} {m} {y}",
+}
+
+
+def fmt_date(lang, iso):
+    y, m, d = (int(x) for x in iso.split("-"))
+    return DATE_FMT[lang].format(d=d, m=MONTHS[lang][m - 1], y=y)
+
+
 T = {
     "en": dict(
-        title="GTA 6 unlock time by city - countdown",
-        desc="When does GTA 6 unlock where you live? Countdown to November 19, 2026 on PS5 and Xbox Series X|S.",
-        h1="When does GTA 6 unlock for you?",
-        sub="Countdown to November 19, 2026 for PS5 and Xbox Series X|S.",
-        assumed="Rockstar has not confirmed one worldwide unlock time. This countdown assumes midnight in your local time zone on November 19. We will switch to the official time as soon as it is announced.",
+        title="{game} unlock time by city - countdown",
+        desc="When does {game} unlock where you live? Countdown to {date} on PS5 and Xbox Series X|S.",
+        h1="When does {game} unlock for you?",
+        sub="Countdown to {date} for PS5 and Xbox Series X|S.",
         official="Official unlock time confirmed by Rockstar.",
-        cd=["Days", "Hours", "Min", "Sec"], released="GTA 6 is out!",
+        cd=["Days", "Hours", "Min", "Sec"], released="{game} is out!",
         local="Your local time", col_city="City", col_time="Unlock (local time)",
-        assumed_cell="00:00 (assumed)", nav_hw="PS5 storage", nav_home="Countdown",
+        assumed_cell="00:00", nav_hw="PS5 storage", nav_home="Countdown",
         hw_title="Which SSD for PS5: what to check before you buy",
         hw_desc="Requirements for PS5 storage expansion: M.2 NVMe Gen4, read speed, heatsink and more.",
         hw_h1="More storage for your PS5: what to know before you buy",
@@ -79,15 +107,14 @@ T = {
         tzlabel="Detected time zone",
     ),
     "de": dict(
-        title="GTA 6 Freischaltzeit nach Stadt - Countdown",
-        desc="Wann startet GTA 6 bei dir? Countdown bis zum 19. November 2026 für PS5 und Xbox Series X|S.",
-        h1="Wann wird GTA 6 für dich freigeschaltet?",
-        sub="Countdown bis zum 19. November 2026 für PS5 und Xbox Series X|S.",
-        assumed="Rockstar hat keine weltweit einheitliche Freischaltzeit bestätigt. Dieser Countdown geht von Mitternacht in deiner lokalen Zeitzone am 19. November aus. Sobald die offizielle Zeit bekannt ist, stellen wir um.",
+        title="{game} Freischaltzeit nach Stadt - Countdown",
+        desc="Wann startet {game} bei dir? Countdown bis zum {date} für PS5 und Xbox Series X|S.",
+        h1="Wann wird {game} für dich freigeschaltet?",
+        sub="Countdown bis zum {date} für PS5 und Xbox Series X|S.",
         official="Offizielle Freischaltzeit von Rockstar bestätigt.",
-        cd=["Tage", "Std.", "Min.", "Sek."], released="GTA 6 ist da!",
+        cd=["Tage", "Std.", "Min.", "Sek."], released="{game} ist da!",
         local="Deine Ortszeit", col_city="Stadt", col_time="Freischaltung (Ortszeit)",
-        assumed_cell="00:00 (angenommen)", nav_hw="PS5-Speicher", nav_home="Countdown",
+        assumed_cell="00:00", nav_hw="PS5-Speicher", nav_home="Countdown",
         hw_title="Die richtige SSD für die PS5: worauf du achten musst",
         hw_desc="Anforderungen an die PS5-Speichererweiterung: M.2 NVMe Gen4, Lesegeschwindigkeit, Kühlkörper und mehr.",
         hw_h1="Mehr Speicher für die PS5: Das musst du vor dem Kauf wissen",
@@ -108,15 +135,14 @@ T = {
         tzlabel="Erkannte Zeitzone",
     ),
     "fr": dict(
-        title="Heure de déblocage de GTA 6 par ville - compte à rebours",
-        desc="À quelle heure GTA 6 se débloque chez toi ? Compte à rebours jusqu'au 19 novembre 2026 sur PS5 et Xbox Series X|S.",
-        h1="À quelle heure GTA 6 se débloque-t-il chez toi ?",
-        sub="Compte à rebours jusqu'au 19 novembre 2026 sur PS5 et Xbox Series X|S.",
-        assumed="Rockstar n'a pas confirmé d'heure de déblocage unique dans le monde. Ce compte à rebours suppose minuit dans ton fuseau horaire local le 19 novembre. Nous passerons à l'heure officielle dès son annonce.",
+        title="Heure de déblocage de {game} par ville - compte à rebours",
+        desc="À quelle heure {game} se débloque chez toi ? Compte à rebours jusqu'au {date} sur PS5 et Xbox Series X|S.",
+        h1="À quelle heure {game} se débloque-t-il chez toi ?",
+        sub="Compte à rebours jusqu'au {date} sur PS5 et Xbox Series X|S.",
         official="Heure de déblocage officielle confirmée par Rockstar.",
-        cd=["Jours", "Heures", "Min", "Sec"], released="GTA 6 est disponible !",
+        cd=["Jours", "Heures", "Min", "Sec"], released="{game} est disponible !",
         local="Ton heure locale", col_city="Ville", col_time="Déblocage (heure locale)",
-        assumed_cell="00:00 (supposé)", nav_hw="Stockage PS5", nav_home="Compte à rebours",
+        assumed_cell="00:00", nav_hw="Stockage PS5", nav_home="Compte à rebours",
         hw_title="Quel SSD pour la PS5 : ce qu'il faut vérifier avant d'acheter",
         hw_desc="Exigences pour l'extension de stockage de la PS5 : M.2 NVMe Gen4, vitesse de lecture, dissipateur et plus.",
         hw_h1="Plus de stockage pour la PS5 : ce qu'il faut savoir avant d'acheter",
@@ -137,15 +163,14 @@ T = {
         tzlabel="Fuseau horaire détecté",
     ),
     "es": dict(
-        title="Hora de desbloqueo de GTA 6 por ciudad - cuenta atrás",
-        desc="¿A qué hora se desbloquea GTA 6 donde vives? Cuenta atrás hasta el 19 de noviembre de 2026 en PS5 y Xbox Series X|S.",
-        h1="¿Cuándo se desbloquea GTA 6 donde vives?",
-        sub="Cuenta atrás hasta el 19 de noviembre de 2026 en PS5 y Xbox Series X|S.",
-        assumed="Rockstar no ha confirmado una hora de desbloqueo única en todo el mundo. Esta cuenta atrás asume la medianoche en tu zona horaria local el 19 de noviembre. Cambiaremos a la hora oficial en cuanto se anuncie.",
+        title="Hora de desbloqueo de {game} por ciudad - cuenta atrás",
+        desc="¿A qué hora se desbloquea {game} donde vives? Cuenta atrás hasta el {date} en PS5 y Xbox Series X|S.",
+        h1="¿Cuándo se desbloquea {game} donde vives?",
+        sub="Cuenta atrás hasta el {date} en PS5 y Xbox Series X|S.",
         official="Hora de desbloqueo oficial confirmada por Rockstar.",
-        cd=["Días", "Horas", "Min", "Seg"], released="¡GTA 6 ya está aquí!",
+        cd=["Días", "Horas", "Min", "Seg"], released="¡{game} ya está aquí!",
         local="Tu hora local", col_city="Ciudad", col_time="Desbloqueo (hora local)",
-        assumed_cell="00:00 (supuesto)", nav_hw="Almacenamiento PS5", nav_home="Cuenta atrás",
+        assumed_cell="00:00", nav_hw="Almacenamiento PS5", nav_home="Cuenta atrás",
         hw_title="Qué SSD comprar para la PS5: lo que debes comprobar",
         hw_desc="Requisitos para ampliar el almacenamiento de la PS5: M.2 NVMe Gen4, velocidad de lectura, disipador y más.",
         hw_h1="Más almacenamiento para la PS5: lo que debes saber antes de comprar",
@@ -166,15 +191,14 @@ T = {
         tzlabel="Zona horaria detectada",
     ),
     "it": dict(
-        title="Orario di sblocco di GTA 6 per città - conto alla rovescia",
-        desc="A che ora si sblocca GTA 6 da te? Conto alla rovescia fino al 19 novembre 2026 su PS5 e Xbox Series X|S.",
-        h1="Quando si sblocca GTA 6 da te?",
-        sub="Conto alla rovescia fino al 19 novembre 2026 su PS5 e Xbox Series X|S.",
-        assumed="Rockstar non ha confermato un unico orario di sblocco mondiale. Questo conto alla rovescia presuppone la mezzanotte nel tuo fuso orario locale il 19 novembre. Passeremo all'orario ufficiale appena verrà annunciato.",
+        title="Orario di sblocco di {game} per città - conto alla rovescia",
+        desc="A che ora si sblocca {game} da te? Conto alla rovescia fino al {date} su PS5 e Xbox Series X|S.",
+        h1="Quando si sblocca {game} da te?",
+        sub="Conto alla rovescia fino al {date} su PS5 e Xbox Series X|S.",
         official="Orario di sblocco ufficiale confermato da Rockstar.",
-        cd=["Giorni", "Ore", "Min", "Sec"], released="GTA 6 è uscito!",
+        cd=["Giorni", "Ore", "Min", "Sec"], released="{game} è uscito!",
         local="Il tuo orario locale", col_city="Città", col_time="Sblocco (ora locale)",
-        assumed_cell="00:00 (presunto)", nav_hw="Archiviazione PS5", nav_home="Conto alla rovescia",
+        assumed_cell="00:00", nav_hw="Archiviazione PS5", nav_home="Conto alla rovescia",
         hw_title="Quale SSD per PS5: cosa controllare prima di comprare",
         hw_desc="Requisiti per l'espansione di memoria della PS5: M.2 NVMe Gen4, velocità di lettura, dissipatore e altro.",
         hw_h1="Più spazio per la PS5: cosa sapere prima di comprare",
@@ -195,15 +219,14 @@ T = {
         tzlabel="Fuso orario rilevato",
     ),
     "pl": dict(
-        title="Godzina odblokowania GTA 6 według miasta - odliczanie",
-        desc="O której odblokuje się GTA 6 u Ciebie? Odliczanie do 19 listopada 2026 na PS5 i Xbox Series X|S.",
-        h1="Kiedy GTA 6 odblokuje się u Ciebie?",
-        sub="Odliczanie do 19 listopada 2026 na PS5 i Xbox Series X|S.",
-        assumed="Rockstar nie potwierdził jednej wspólnej godziny odblokowania na całym świecie. To odliczanie zakłada północ w Twojej strefie czasowej 19 listopada. Przełączymy je na oficjalną godzinę, gdy tylko zostanie ogłoszona.",
+        title="Godzina odblokowania {game} według miasta - odliczanie",
+        desc="O której odblokuje się {game} u Ciebie? Odliczanie do {date} na PS5 i Xbox Series X|S.",
+        h1="Kiedy {game} odblokuje się u Ciebie?",
+        sub="Odliczanie do {date} na PS5 i Xbox Series X|S.",
         official="Oficjalna godzina odblokowania potwierdzona przez Rockstar.",
-        cd=["Dni", "Godz.", "Min", "Sek."], released="GTA 6 już jest!",
+        cd=["Dni", "Godz.", "Min", "Sek."], released="{game} już jest!",
         local="Twój czas lokalny", col_city="Miasto", col_time="Odblokowanie (czas lokalny)",
-        assumed_cell="00:00 (zakładane)", nav_hw="Pamięć PS5", nav_home="Odliczanie",
+        assumed_cell="00:00", nav_hw="Pamięć PS5", nav_home="Odliczanie",
         hw_title="Jaki dysk SSD do PS5: na co zwrócić uwagę przed zakupem",
         hw_desc="Wymagania dla rozszerzenia pamięci PS5: M.2 NVMe Gen4, prędkość odczytu, radiator i więcej.",
         hw_h1="Więcej miejsca na PS5: co warto wiedzieć przed zakupem",
@@ -224,15 +247,14 @@ T = {
         tzlabel="Wykryta strefa czasowa",
     ),
     "nl": dict(
-        title="Ontgrendeltijd van GTA 6 per stad - aftelklok",
-        desc="Hoe laat wordt GTA 6 bij jou ontgrendeld? Aftellen naar 19 november 2026 op PS5 en Xbox Series X|S.",
-        h1="Wanneer wordt GTA 6 bij jou ontgrendeld?",
-        sub="Aftellen naar 19 november 2026 op PS5 en Xbox Series X|S.",
-        assumed="Rockstar heeft geen wereldwijd uniforme ontgrendeltijd bevestigd. Deze aftelklok gaat uit van middernacht in jouw lokale tijdzone op 19 november. Zodra de officiële tijd bekend is, schakelen we over.",
+        title="Ontgrendeltijd van {game} per stad - aftelklok",
+        desc="Hoe laat wordt {game} bij jou ontgrendeld? Aftellen naar {date} op PS5 en Xbox Series X|S.",
+        h1="Wanneer wordt {game} bij jou ontgrendeld?",
+        sub="Aftellen naar {date} op PS5 en Xbox Series X|S.",
         official="Officiële ontgrendeltijd bevestigd door Rockstar.",
-        cd=["Dagen", "Uur", "Min", "Sec"], released="GTA 6 is uit!",
+        cd=["Dagen", "Uur", "Min", "Sec"], released="{game} is uit!",
         local="Jouw lokale tijd", col_city="Stad", col_time="Ontgrendeling (lokale tijd)",
-        assumed_cell="00:00 (aangenomen)", nav_hw="PS5-opslag", nav_home="Aftellen",
+        assumed_cell="00:00", nav_hw="PS5-opslag", nav_home="Aftellen",
         hw_title="Welke SSD voor de PS5: waar je op moet letten",
         hw_desc="Eisen voor PS5-opslaguitbreiding: M.2 NVMe Gen4, leessnelheid, heatsink en meer.",
         hw_h1="Meer opslag voor de PS5: dit moet je weten voor je koopt",
@@ -253,15 +275,14 @@ T = {
         tzlabel="Gedetecteerde tijdzone",
     ),
     "ar": dict(
-        title="موعد فتح GTA 6 حسب المدينة - العد التنازلي",
-        desc="متى تُفتح GTA 6 في مدينتك؟ عدّ تنازلي حتى 19 نوفمبر 2026 على PS5 وXbox Series X|S.",
-        h1="متى تُفتح GTA 6 في مدينتك؟",
-        sub="عدّ تنازلي حتى 19 نوفمبر 2026 على PS5 وXbox Series X|S.",
-        assumed="لم تؤكد Rockstar موعد فتح موحّدًا في جميع أنحاء العالم. يفترض هذا العدّ التنازلي منتصف الليل بتوقيتك المحلي في 19 نوفمبر. سنحدّثه إلى الموعد الرسمي فور الإعلان عنه.",
+        title="موعد فتح {game} حسب المدينة - العد التنازلي",
+        desc="متى تُفتح {game} في مدينتك؟ عدّ تنازلي حتى {date} على PS5 وXbox Series X|S.",
+        h1="متى تُفتح {game} في مدينتك؟",
+        sub="عدّ تنازلي حتى {date} على PS5 وXbox Series X|S.",
         official="الموعد الرسمي للفتح مؤكَّد من Rockstar.",
-        cd=["أيام", "ساعات", "دقائق", "ثوانٍ"], released="GTA 6 متاحة الآن!",
+        cd=["أيام", "ساعات", "دقائق", "ثوانٍ"], released="{game} متاحة الآن!",
         local="توقيتك المحلي", col_city="المدينة", col_time="الفتح (بالتوقيت المحلي)",
-        assumed_cell="00:00 (افتراضي)", nav_hw="تخزين PS5", nav_home="العد التنازلي",
+        assumed_cell="00:00", nav_hw="تخزين PS5", nav_home="العد التنازلي",
         hw_title="أي SSD تختار لجهاز PS5: ما يجب التحقق منه قبل الشراء",
         hw_desc="متطلبات توسعة تخزين PS5: M.2 NVMe من الجيل الرابع، سرعة القراءة، المبرّد الحراري وغيرها.",
         hw_h1="مساحة تخزين أكبر لجهاز PS5: ما يجب معرفته قبل الشراء",
@@ -283,6 +304,271 @@ T = {
     ),
 }
 
+# Extra copy for the storage-size and download-help pages and the updated launch note.
+# Placeholders: {game} {size} {date} (release date) {checked} (facts last checked).
+T2 = {
+    "en": dict(
+        note="PlayStation says the launch rolls out at midnight local time, country by country, on {date}. Check your console's store page for your exact time. Xbox Series X|S timing may differ.",
+        src_label="Sources",
+        nav_size="{game} size", nav_help="Download help",
+        size_title="How much storage does {game} need on PS5 and Xbox?",
+        size_desc="Rockstar says {game} needs up to {size} GB of free space. What that means for PS5 and Xbox Series X|S, and what to do if you are short.",
+        size_h1="How much storage does {game} need?",
+        size_intro="Rockstar says the {game} pre-load needs up to {size} GB of free space, depending on your device.",
+        size_points=["Plan for up to {size} GB of free space before you start the download.",
+                     "The game is out on PS5 and Xbox Series X|S. Rockstar lists these two platforms.",
+                     "Physical copies come as a download code in the box. There is no disc, so a physical copy does not save space.",
+                     "Rockstar gives the figure as “up to”, so the exact size on your console can differ."],
+        size_next_h="Not enough space?",
+        size_next="Delete games you no longer play, or add storage. PS5 supports an M.2 NVMe SSD (requirements are in our storage guide). Xbox Series X|S needs its own expansion card.",
+        help_title="{game} won't download? What Rockstar says to check",
+        help_desc="A checklist built from Rockstar's official pre-load FAQ for PS5 and Xbox Series X|S.",
+        help_h1="{game} won't download? Check these first",
+        help_intro="These steps come from Rockstar's official pre-load FAQ. We have no fixes of our own, and we will add more only when official sources confirm them.",
+        help_ps5_h="PS5",
+        help_ps5=["Turn on auto-downloads.", "Leave the console on, or in Rest Mode.", "Free up to {size} GB of space.",
+                  "If you bought a physical copy, redeem the code from the box. There is no disc."],
+        help_xbox_h="Xbox Series X|S",
+        help_xbox=["Turn on automatic updates.", "Leave the console on, or in Sleep mode.", "Free up to {size} GB of space.",
+                   "If you bought a physical copy, redeem the code from the box. There is no disc."],
+        help_more_h="Still stuck?",
+        help_more="Rockstar's pre-load FAQ links to troubleshooting articles for each console, and its support team takes requests 24/7. Use the links below.",
+        checked="Last checked: {checked}",
+        src_note="We summarize official pages and may be out of date. Check the sources before you act.",
+    ),
+    "de": dict(
+        note="Laut PlayStation startet das Spiel am {date} um Mitternacht Ortszeit, Land für Land. Prüfe die Store-Seite deiner Konsole für deine genaue Zeit. Auf Xbox Series X|S kann sie abweichen.",
+        src_label="Quellen",
+        nav_size="{game}-Größe", nav_help="Download-Hilfe",
+        size_title="Wie viel Speicher braucht {game} auf PS5 und Xbox?",
+        size_desc="Laut Rockstar braucht {game} bis zu {size} GB freien Speicher. Was das für PS5 und Xbox Series X|S bedeutet und was du bei Platzmangel tun kannst.",
+        size_h1="Wie viel Speicher braucht {game}?",
+        size_intro="Laut Rockstar braucht der Vorab-Download von {game} je nach Gerät bis zu {size} GB freien Speicher.",
+        size_points=["Plane vor dem Download bis zu {size} GB freien Speicher ein.",
+                     "Das Spiel ist für PS5 und Xbox Series X|S erschienen. Rockstar nennt diese beiden Plattformen.",
+                     "Physische Kopien enthalten nur einen Download-Code, keine Disc. Du sparst dadurch also keinen Speicher.",
+                     "Rockstar gibt den Wert als „bis zu“ an, die genaue Größe auf deiner Konsole kann daher abweichen."],
+        size_next_h="Nicht genug Platz?",
+        size_next="Lösche Spiele, die du nicht mehr spielst, oder erweitere den Speicher. Die PS5 unterstützt eine M.2-NVMe-SSD (Anforderungen in unserem Speicher-Ratgeber). Die Xbox Series X|S braucht eine eigene Speichererweiterungskarte.",
+        help_title="{game} lädt nicht? Das empfiehlt Rockstar zu prüfen",
+        help_desc="Eine Checkliste aus Rockstars offizieller Vorab-Download-FAQ für PS5 und Xbox Series X|S.",
+        help_h1="{game} lädt nicht? Prüfe zuerst das",
+        help_intro="Diese Schritte stammen aus Rockstars offizieller Vorab-Download-FAQ. Eigene Lösungen haben wir nicht und ergänzen weitere nur, wenn offizielle Quellen sie bestätigen.",
+        help_ps5_h="PS5",
+        help_ps5=["Aktiviere automatische Downloads.", "Lass die Konsole eingeschaltet oder im Ruhemodus.", "Gib bis zu {size} GB Speicher frei.",
+                  "Bei einer physischen Kopie löst du den Code aus der Verpackung ein. Es gibt keine Disc."],
+        help_xbox_h="Xbox Series X|S",
+        help_xbox=["Aktiviere automatische Updates.", "Lass die Konsole eingeschaltet oder im Energiesparmodus.", "Gib bis zu {size} GB Speicher frei.",
+                   "Bei einer physischen Kopie löst du den Code aus der Verpackung ein. Es gibt keine Disc."],
+        help_more_h="Immer noch Probleme?",
+        help_more="Rockstars Vorab-Download-FAQ verlinkt Fehlerbehebungs-Artikel für jede Konsole, und der Support nimmt Anfragen rund um die Uhr entgegen. Nutze die Links unten.",
+        checked="Zuletzt geprüft: {checked}",
+        src_note="Wir fassen offizielle Seiten zusammen und können veraltet sein. Prüfe die Quellen, bevor du handelst.",
+    ),
+    "fr": dict(
+        note="Selon PlayStation, le jeu se débloque à minuit, heure locale, pays par pays, le {date}. Consulte la page du store de ta console pour ton heure exacte. Sur Xbox Series X|S, elle peut différer.",
+        src_label="Sources",
+        nav_size="Taille de {game}", nav_help="Aide au téléchargement",
+        size_title="De combien d'espace {game} a-t-il besoin sur PS5 et Xbox ?",
+        size_desc="Rockstar indique jusqu'à {size} Go d'espace libre pour {game}. Ce que cela signifie pour PS5 et Xbox Series X|S, et que faire s'il manque de la place.",
+        size_h1="De combien d'espace {game} a-t-il besoin ?",
+        size_intro="Selon Rockstar, le préchargement de {game} demande jusqu'à {size} Go d'espace libre, selon ton appareil.",
+        size_points=["Prévois jusqu'à {size} Go d'espace libre avant de lancer le téléchargement.",
+                     "Le jeu est sorti sur PS5 et Xbox Series X|S. Rockstar indique ces deux plateformes.",
+                     "Les copies physiques contiennent un code de téléchargement, pas de disque. Elles ne font donc pas gagner d'espace.",
+                     "Rockstar donne ce chiffre comme un maximum (« jusqu'à »), la taille exacte sur ta console peut donc différer."],
+        size_next_h="Pas assez de place ?",
+        size_next="Supprime les jeux auxquels tu ne joues plus ou ajoute du stockage. La PS5 accepte un SSD M.2 NVMe (exigences dans notre guide de stockage). La Xbox Series X|S a besoin de sa propre carte d'extension.",
+        help_title="{game} ne se télécharge pas ? Ce que Rockstar conseille de vérifier",
+        help_desc="Une liste de vérifications tirée de la FAQ officielle de Rockstar sur le préchargement, pour PS5 et Xbox Series X|S.",
+        help_h1="{game} ne se télécharge pas ? Vérifie d'abord ceci",
+        help_intro="Ces étapes viennent de la FAQ officielle de Rockstar sur le préchargement. Nous n'avons pas de solutions à nous et n'en ajouterons que si des sources officielles les confirment.",
+        help_ps5_h="PS5",
+        help_ps5=["Active les téléchargements automatiques.", "Laisse la console allumée ou en mode repos.", "Libère jusqu'à {size} Go d'espace.",
+                  "Si tu as une copie physique, active le code fourni dans la boîte. Il n'y a pas de disque."],
+        help_xbox_h="Xbox Series X|S",
+        help_xbox=["Active les mises à jour automatiques.", "Laisse la console allumée ou en veille.", "Libère jusqu'à {size} Go d'espace.",
+                   "Si tu as une copie physique, active le code fourni dans la boîte. Il n'y a pas de disque."],
+        help_more_h="Toujours bloqué ?",
+        help_more="La FAQ de Rockstar renvoie vers des articles de dépannage pour chaque console, et son support répond aux demandes 24 h/24. Utilise les liens ci-dessous.",
+        checked="Dernière vérification : {checked}",
+        src_note="Nous résumons des pages officielles et nos informations peuvent être périmées. Vérifie les sources avant d'agir.",
+    ),
+    "es": dict(
+        note="Según PlayStation, el juego se desbloquea a medianoche, hora local, país por país, el {date}. Consulta la página de la tienda de tu consola para saber tu hora exacta. En Xbox Series X|S puede variar.",
+        src_label="Fuentes",
+        nav_size="Tamaño de {game}", nav_help="Ayuda con la descarga",
+        size_title="¿Cuánto espacio necesita {game} en PS5 y Xbox?",
+        size_desc="Rockstar indica hasta {size} GB de espacio libre para {game}. Qué significa para PS5 y Xbox Series X|S y qué hacer si te falta espacio.",
+        size_h1="¿Cuánto espacio necesita {game}?",
+        size_intro="Según Rockstar, la precarga de {game} necesita hasta {size} GB de espacio libre, según tu dispositivo.",
+        size_points=["Prepara hasta {size} GB de espacio libre antes de empezar la descarga.",
+                     "El juego ya está disponible en PS5 y Xbox Series X|S. Rockstar indica estas dos plataformas.",
+                     "Las copias físicas incluyen un código de descarga, no un disco. Por eso no ahorran espacio.",
+                     "Rockstar da la cifra como «hasta», así que el tamaño exacto en tu consola puede variar."],
+        size_next_h="¿No tienes espacio suficiente?",
+        size_next="Borra juegos que ya no uses o amplía el almacenamiento. La PS5 admite un SSD M.2 NVMe (requisitos en nuestra guía de almacenamiento). La Xbox Series X|S necesita su propia tarjeta de expansión.",
+        help_title="¿{game} no se descarga? Qué recomienda revisar Rockstar",
+        help_desc="Una lista de comprobación basada en las preguntas frecuentes oficiales de Rockstar sobre la precarga, para PS5 y Xbox Series X|S.",
+        help_h1="¿{game} no se descarga? Revisa esto primero",
+        help_intro="Estos pasos salen de las preguntas frecuentes oficiales de Rockstar sobre la precarga. No tenemos soluciones propias y solo añadiremos más cuando fuentes oficiales las confirmen.",
+        help_ps5_h="PS5",
+        help_ps5=["Activa las descargas automáticas.", "Deja la consola encendida o en modo reposo.", "Libera hasta {size} GB de espacio.",
+                  "Si compraste una copia física, canjea el código de la caja. No hay disco."],
+        help_xbox_h="Xbox Series X|S",
+        help_xbox=["Activa las actualizaciones automáticas.", "Deja la consola encendida o en modo suspensión.", "Libera hasta {size} GB de espacio.",
+                   "Si compraste una copia física, canjea el código de la caja. No hay disco."],
+        help_more_h="¿Sigues atascado?",
+        help_more="Las preguntas frecuentes de Rockstar enlazan a artículos de solución de problemas para cada consola, y su soporte atiende solicitudes las 24 horas. Usa los enlaces de abajo.",
+        checked="Última comprobación: {checked}",
+        src_note="Resumimos páginas oficiales y la información puede estar desactualizada. Comprueba las fuentes antes de actuar.",
+    ),
+    "it": dict(
+        note="Secondo PlayStation, il gioco si sblocca a mezzanotte ora locale, paese per paese, il {date}. Controlla la pagina dello store della tua console per l'orario esatto. Su Xbox Series X|S potrebbe essere diverso.",
+        src_label="Fonti",
+        nav_size="Dimensioni di {game}", nav_help="Aiuto con il download",
+        size_title="Quanto spazio serve a {game} su PS5 e Xbox?",
+        size_desc="Rockstar indica fino a {size} GB di spazio libero per {game}. Cosa significa per PS5 e Xbox Series X|S e cosa fare se manca spazio.",
+        size_h1="Quanto spazio serve a {game}?",
+        size_intro="Secondo Rockstar, il pre-caricamento di {game} richiede fino a {size} GB di spazio libero, a seconda del dispositivo.",
+        size_points=["Prevedi fino a {size} GB di spazio libero prima di avviare il download.",
+                     "Il gioco è uscito su PS5 e Xbox Series X|S. Rockstar indica queste due piattaforme.",
+                     "Le copie fisiche contengono un codice di download, non un disco. Quindi non fanno risparmiare spazio.",
+                     "Rockstar indica il valore come «fino a», perciò la dimensione esatta sulla tua console può variare."],
+        size_next_h="Spazio insufficiente?",
+        size_next="Elimina i giochi che non usi più o aggiungi memoria. La PS5 supporta un SSD M.2 NVMe (requisiti nella nostra guida all'archiviazione). La Xbox Series X|S richiede una propria scheda di espansione.",
+        help_title="{game} non si scarica? Cosa consiglia di controllare Rockstar",
+        help_desc="Una checklist basata sulle FAQ ufficiali di Rockstar sul pre-caricamento, per PS5 e Xbox Series X|S.",
+        help_h1="{game} non si scarica? Controlla prima questo",
+        help_intro="Questi passaggi vengono dalle FAQ ufficiali di Rockstar sul pre-caricamento. Non abbiamo soluzioni nostre e ne aggiungeremo altre solo se fonti ufficiali le confermano.",
+        help_ps5_h="PS5",
+        help_ps5=["Attiva i download automatici.", "Lascia la console accesa o in modalità riposo.", "Libera fino a {size} GB di spazio.",
+                  "Se hai una copia fisica, riscatta il codice nella confezione. Non c'è il disco."],
+        help_xbox_h="Xbox Series X|S",
+        help_xbox=["Attiva gli aggiornamenti automatici.", "Lascia la console accesa o in modalità sospensione.", "Libera fino a {size} GB di spazio.",
+                   "Se hai una copia fisica, riscatta il codice nella confezione. Non c'è il disco."],
+        help_more_h="Sei ancora bloccato?",
+        help_more="Le FAQ di Rockstar rimandano ad articoli di risoluzione dei problemi per ogni console e il supporto accetta richieste 24 ore su 24. Usa i link qui sotto.",
+        checked="Ultimo controllo: {checked}",
+        src_note="Riassumiamo pagine ufficiali e le informazioni potrebbero essere superate. Controlla le fonti prima di agire.",
+    ),
+    "pl": dict(
+        note="Według PlayStation gra odblokowuje się o północy czasu lokalnego, kraj po kraju, {date}. Sprawdź stronę sklepu na swojej konsoli, aby poznać dokładną godzinę. Na Xbox Series X|S może być inaczej.",
+        src_label="Źródła",
+        nav_size="Rozmiar {game}", nav_help="Pomoc z pobieraniem",
+        size_title="Ile miejsca potrzebuje {game} na PS5 i Xbox?",
+        size_desc="Rockstar podaje do {size} GB wolnego miejsca dla {game}. Co to oznacza dla PS5 i Xbox Series X|S i co zrobić, gdy brakuje miejsca.",
+        size_h1="Ile miejsca potrzebuje {game}?",
+        size_intro="Według Rockstar przedpobranie {game} wymaga do {size} GB wolnego miejsca, w zależności od urządzenia.",
+        size_points=["Przygotuj do {size} GB wolnego miejsca, zanim zaczniesz pobieranie.",
+                     "Gra jest dostępna na PS5 i Xbox Series X|S. Rockstar wymienia te dwie platformy.",
+                     "Wersje pudełkowe zawierają kod do pobrania, a nie płytę. Nie oszczędzają więc miejsca.",
+                     "Rockstar podaje wartość jako „do”, więc dokładny rozmiar na Twojej konsoli może się różnić."],
+        size_next_h="Za mało miejsca?",
+        size_next="Usuń gry, w które już nie grasz, lub dodaj pamięć. PS5 obsługuje dysk M.2 NVMe SSD (wymagania w naszym poradniku o pamięci). Xbox Series X|S wymaga własnej karty rozszerzenia.",
+        help_title="{game} się nie pobiera? Co radzi sprawdzić Rockstar",
+        help_desc="Lista kontrolna oparta na oficjalnym FAQ Rockstar o przedpobraniu, dla PS5 i Xbox Series X|S.",
+        help_h1="{game} się nie pobiera? Sprawdź najpierw to",
+        help_intro="Te kroki pochodzą z oficjalnego FAQ Rockstar o przedpobraniu. Nie mamy własnych rozwiązań i dodamy kolejne tylko wtedy, gdy potwierdzą je oficjalne źródła.",
+        help_ps5_h="PS5",
+        help_ps5=["Włącz automatyczne pobieranie.", "Zostaw konsolę włączoną lub w trybie spoczynku.", "Zwolnij do {size} GB miejsca.",
+                  "Jeśli masz wersję pudełkową, zrealizuj kod z pudełka. Płyty nie ma."],
+        help_xbox_h="Xbox Series X|S",
+        help_xbox=["Włącz automatyczne aktualizacje.", "Zostaw konsolę włączoną lub w trybie uśpienia.", "Zwolnij do {size} GB miejsca.",
+                   "Jeśli masz wersję pudełkową, zrealizuj kod z pudełka. Płyty nie ma."],
+        help_more_h="Nadal nie działa?",
+        help_more="FAQ Rockstar odsyła do artykułów z rozwiązywaniem problemów dla każdej konsoli, a pomoc techniczna przyjmuje zgłoszenia całą dobę. Skorzystaj z linków poniżej.",
+        checked="Ostatnio sprawdzono: {checked}",
+        src_note="Streszczamy oficjalne strony i informacje mogą być nieaktualne. Sprawdź źródła, zanim coś zrobisz.",
+    ),
+    "nl": dict(
+        note="Volgens PlayStation wordt het spel op {date} om middernacht lokale tijd ontgrendeld, land voor land. Bekijk de storepagina van je console voor je exacte tijd. Op Xbox Series X|S kan die afwijken.",
+        src_label="Bronnen",
+        nav_size="Grootte van {game}", nav_help="Downloadhulp",
+        size_title="Hoeveel opslag heeft {game} nodig op PS5 en Xbox?",
+        size_desc="Rockstar noemt tot {size} GB vrije ruimte voor {game}. Wat dat betekent voor PS5 en Xbox Series X|S en wat je kunt doen bij te weinig ruimte.",
+        size_h1="Hoeveel opslag heeft {game} nodig?",
+        size_intro="Volgens Rockstar heeft het vooraf downloaden van {game} tot {size} GB vrije ruimte nodig, afhankelijk van je apparaat.",
+        size_points=["Reken op tot {size} GB vrije ruimte voordat je de download start.",
+                     "Het spel is uit voor PS5 en Xbox Series X|S. Rockstar noemt deze twee platforms.",
+                     "Fysieke exemplaren bevatten een downloadcode, geen disc. Ze besparen dus geen ruimte.",
+                     "Rockstar geeft de waarde als “tot”, dus de exacte grootte op jouw console kan verschillen."],
+        size_next_h="Te weinig ruimte?",
+        size_next="Verwijder games die je niet meer speelt of voeg opslag toe. De PS5 ondersteunt een M.2 NVMe-SSD (eisen in onze opslaggids). De Xbox Series X|S heeft een eigen uitbreidingskaart nodig.",
+        help_title="Wil {game} niet downloaden? Dit raadt Rockstar aan te controleren",
+        help_desc="Een checklist op basis van Rockstars officiële veelgestelde vragen over vooraf downloaden, voor PS5 en Xbox Series X|S.",
+        help_h1="Wil {game} niet downloaden? Controleer eerst dit",
+        help_intro="Deze stappen komen uit Rockstars officiële veelgestelde vragen over vooraf downloaden. We hebben geen eigen oplossingen en voegen er alleen meer toe als officiële bronnen ze bevestigen.",
+        help_ps5_h="PS5",
+        help_ps5=["Zet automatische downloads aan.", "Laat de console aan staan of in rustmodus.", "Maak tot {size} GB ruimte vrij.",
+                  "Heb je een fysiek exemplaar? Verzilver dan de code uit de doos. Er zit geen disc in."],
+        help_xbox_h="Xbox Series X|S",
+        help_xbox=["Zet automatische updates aan.", "Laat de console aan staan of in slaapstand.", "Maak tot {size} GB ruimte vrij.",
+                   "Heb je een fysiek exemplaar? Verzilver dan de code uit de doos. Er zit geen disc in."],
+        help_more_h="Nog steeds vast?",
+        help_more="De veelgestelde vragen van Rockstar verwijzen naar probleemoplossingsartikelen per console, en de support neemt dag en nacht verzoeken aan. Gebruik de links hieronder.",
+        checked="Laatst gecontroleerd: {checked}",
+        src_note="We vatten officiële pagina's samen en kunnen achterlopen. Controleer de bronnen voordat je iets doet.",
+    ),
+    "ar": dict(
+        note="وفقًا لـ PlayStation، تُفتح اللعبة عند منتصف الليل بالتوقيت المحلي، دولة بعد أخرى، في {date}. راجع صفحة المتجر على جهازك لمعرفة وقتك الدقيق. قد يختلف الوقت على Xbox Series X|S.",
+        src_label="المصادر",
+        nav_size="حجم {game}", nav_help="مساعدة التنزيل",
+        size_title="كم من المساحة تحتاج {game} على PS5 وXbox؟",
+        size_desc="تذكر Rockstar أن {game} تحتاج إلى ما يصل إلى {size} غيغابايت من المساحة الحرة. ماذا يعني ذلك لجهازي PS5 وXbox Series X|S وماذا تفعل إذا كانت المساحة غير كافية.",
+        size_h1="كم من المساحة تحتاج {game}؟",
+        size_intro="تذكر Rockstar أن التحميل المسبق لـ {game} يحتاج إلى ما يصل إلى {size} غيغابايت من المساحة الحرة، حسب جهازك.",
+        size_points=["جهّز ما يصل إلى {size} غيغابايت من المساحة الحرة قبل بدء التنزيل.",
+                     "اللعبة متاحة على PS5 وXbox Series X|S. هاتان هما المنصتان اللتان تذكرهما Rockstar.",
+                     "تحتوي النسخ الفعلية على رمز تنزيل وليس قرصًا، لذلك لا توفر أي مساحة.",
+                     "تذكر Rockstar الرقم على أنه «حتى»، لذلك قد يختلف الحجم الدقيق على جهازك."],
+        size_next_h="المساحة غير كافية؟",
+        size_next="احذف الألعاب التي لم تعد تلعبها أو أضف مساحة تخزين. يدعم PS5 قرص M.2 NVMe SSD (المتطلبات في دليل التخزين لدينا). أما Xbox Series X|S فيحتاج إلى بطاقة توسعة خاصة به.",
+        help_title="لا يتم تنزيل {game}؟ ما تنصح Rockstar بالتحقق منه",
+        help_desc="قائمة تحقق مبنية على الأسئلة الشائعة الرسمية من Rockstar حول التحميل المسبق، لجهازي PS5 وXbox Series X|S.",
+        help_h1="لا يتم تنزيل {game}؟ تحقق من هذا أولًا",
+        help_intro="هذه الخطوات مأخوذة من الأسئلة الشائعة الرسمية من Rockstar حول التحميل المسبق. ليست لدينا حلول خاصة بنا، ولن نضيف المزيد إلا إذا أكدته مصادر رسمية.",
+        help_ps5_h="PS5",
+        help_ps5=["فعّل التنزيلات التلقائية.", "اترك الجهاز قيد التشغيل أو في وضع الراحة (Rest Mode).", "وفّر ما يصل إلى {size} غيغابايت من المساحة.",
+                  "إذا اشتريت نسخة فعلية، فعّل الرمز الموجود في العلبة. لا يوجد قرص."],
+        help_xbox_h="Xbox Series X|S",
+        help_xbox=["فعّل التحديثات التلقائية.", "اترك الجهاز قيد التشغيل أو في وضع السكون (Sleep).", "وفّر ما يصل إلى {size} غيغابايت من المساحة.",
+                   "إذا اشتريت نسخة فعلية، فعّل الرمز الموجود في العلبة. لا يوجد قرص."],
+        help_more_h="ما زالت المشكلة قائمة؟",
+        help_more="تحيل الأسئلة الشائعة من Rockstar إلى مقالات استكشاف الأخطاء لكل جهاز، ويستقبل فريق الدعم الطلبات على مدار الساعة. استخدم الروابط أدناه.",
+        checked="آخر تحقق: {checked}",
+        src_note="نلخّص صفحات رسمية وقد تكون المعلومات قديمة. تحقق من المصادر قبل التصرف.",
+    ),
+}
+
+
+for _lang, _extra in T2.items():
+    T[_lang].update(_extra)
+
+
+def _finalize_texts():
+    for lang, t in T.items():
+        subs = {
+            "{game}": GAME["name"],
+            "{size}": str(GAME.get("storage_gb", "")),
+            "{date}": fmt_date(lang, GAME["release_date"]),
+            "{checked}": fmt_date(lang, GAME["facts_checked"]),
+        }
+
+        def apply(v):
+            for k, val in subs.items():
+                v = v.replace(k, val)
+            return v
+
+        for k, v in list(t.items()):
+            if isinstance(v, str):
+                t[k] = apply(v)
+            elif isinstance(v, list):
+                t[k] = [apply(x) if isinstance(x, str) else x for x in v]
+
+
+_finalize_texts()
+
 CSS = """
 :root{--bg:#14061f;--ink:#fff3f8;--mut:#c9b3dc;--flamingo:#ff4f8b;--orange:#ff9a3c;--teal:#28d9c8;--line:rgba(255,79,139,.3)}
 *{box-sizing:border-box}
@@ -294,7 +580,8 @@ body{margin:0;background:radial-gradient(900px 420px at 50% -60px,#4a1260 0%,rgb
 header{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
 .brand{font:italic 900 1.45rem/1 "Arial Black","Helvetica Neue",Arial,sans-serif;letter-spacing:-.02em}
 .brand::before{content:"";display:inline-block;width:.8em;height:.8em;margin-inline-end:.45em;border-radius:50%;background:linear-gradient(180deg,#ffe38a,#ff4f8b);vertical-align:-.05em}
-nav a,.langs a{color:var(--mut);text-decoration:none;margin-inline-end:16px}
+nav{display:flex;flex-wrap:wrap;gap:4px 0}
+nav a,.langs a{color:var(--mut);text-decoration:none;margin-inline-end:16px;white-space:nowrap}
 nav a:hover,.langs a:hover{color:var(--ink)}
 nav a.on,.langs a.on{color:var(--ink);font-weight:700;box-shadow:inset 0 -2px 0 var(--flamingo)}
 .langs{display:flex;flex-wrap:wrap;gap:6px 0;padding:12px 0 0;font-size:.92rem}
@@ -340,7 +627,13 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line)}
 
 def path_for(lang, page):
     base = "/" if lang == "en" else f"/{lang}/"
-    return base if page == "home" else f"{base}ps5-storage/"
+    if page == "home":
+        return base
+    if page == "hw":
+        return f"{base}ps5-storage/"
+    if page == "size":
+        return f"{base}{GAME['slug']}/storage/"
+    return f"{base}{GAME['slug']}/help/"
 
 
 def affiliate_url(lang, query):
@@ -389,6 +682,8 @@ def layout(lang, page, title, desc, body, script=""):
     )
     nav = (
         f'<a href="{path_for(lang, "home")}"{" class=on" if page == "home" else ""}>{escape(t["nav_home"])}</a>'
+        f'<a href="{path_for(lang, "size")}"{" class=on" if page == "size" else ""}>{escape(t["nav_size"])}</a>'
+        f'<a href="{path_for(lang, "help")}"{" class=on" if page == "help" else ""}>{escape(t["nav_help"])}</a>'
         f'<a href="{path_for(lang, "hw")}"{" class=on" if page == "hw" else ""}>{escape(t["nav_hw"])}</a>'
     )
     canonical = f'{SITE_URL}{path_for(lang, page)}'
@@ -428,9 +723,54 @@ def layout(lang, page, title, desc, body, script=""):
 """
 
 
+def sources_block(lang, keys):
+    t = T[lang]
+    items = "".join(
+        f'<li><a href="{escape(SRC[k]["url"])}" rel="noopener" target="_blank">{escape(SRC[k]["title"])}</a></li>'
+        for k in keys
+    )
+    return (
+        f'<h2>{escape(t["src_label"])}</h2><ul class="specs">{items}</ul>'
+        f'<p class="small">{escape(t["checked"])}. {escape(t["src_note"])}</p>'
+    )
+
+
+def size_page(lang):
+    t = T[lang]
+    pts = "".join(f"<li>{escape(x)}</li>" for x in t["size_points"])
+    body = f"""
+<h1>{escape(t["size_h1"])}</h1>
+<p class="sub">{escape(t["size_intro"])}</p>
+<ul class="specs">{pts}</ul>
+<h2>{escape(t["size_next_h"])}</h2>
+<p>{escape(t["size_next"])}</p>
+<div class="btns"><a class="btn" href="{path_for(lang, "hw")}">{escape(t["nav_hw"])}</a></div>
+{sources_block(lang, ["rockstar_preload", "rockstar_platforms"])}
+"""
+    return layout(lang, "size", t["size_title"], t["size_desc"], body)
+
+
+def help_page(lang):
+    t = T[lang]
+    ps5 = "".join(f"<li>{escape(x)}</li>" for x in t["help_ps5"])
+    xbox = "".join(f"<li>{escape(x)}</li>" for x in t["help_xbox"])
+    body = f"""
+<h1>{escape(t["help_h1"])}</h1>
+<p class="sub">{escape(t["help_intro"])}</p>
+<h2>{escape(t["help_ps5_h"])}</h2>
+<ul class="specs">{ps5}</ul>
+<h2>{escape(t["help_xbox_h"])}</h2>
+<ul class="specs">{xbox}</ul>
+<h2>{escape(t["help_more_h"])}</h2>
+<p>{escape(t["help_more"])}</p>
+{sources_block(lang, ["rockstar_preload", "rockstar_platforms"])}
+"""
+    return layout(lang, "help", t["help_title"], t["help_desc"], body)
+
+
 def home_page(lang):
     t = T[lang]
-    status = t["official"] if UNLOCK_UTC else t["assumed"]
+    status = t["official"] if UNLOCK_UTC else t["note"]
     cd = "".join(f'<div><b id="cd{i}">--</b><span>{escape(label)}</span></div>' for i, label in enumerate(t["cd"]))
     rows = "".join(
         f'<tr><td>{escape(name)}</td><td data-tz="{tz}">{escape(t["assumed_cell"])}</td></tr>'
@@ -442,12 +782,17 @@ def home_page(lang):
 <div class="note">{escape(status)}</div>
 <div class="cd" id="cd">{cd}</div>
 <div class="out" id="out" hidden>{escape(t["released"])}</div>
+<div class="btns">
+<a class="btn" href="{path_for(lang, "size")}">{escape(t["nav_size"])}</a>
+<a class="btn" href="{path_for(lang, "help")}">{escape(t["nav_help"])}</a>
+<a class="btn" href="{path_for(lang, "hw")}">{escape(t["nav_hw"])}</a>
+</div>
 <p class="small">{escape(t["local"])}: <b id="mine">{escape(t["assumed_cell"])}</b> &middot; {escape(t["tzlabel"])}: <span id="tz">-</span></p>
 <table>
 <thead><tr><th>{escape(t["col_city"])}</th><th>{escape(t["col_time"])}</th></tr></thead>
 <tbody>{rows}</tbody>
 </table>
-<p><a class="btn" href="{path_for(lang, "hw")}">{escape(t["nav_hw"])}</a></p>
+{sources_block(lang, ["playstation_blog"])}
 """
     cfg = json.dumps({
         "unlock_utc": UNLOCK_UTC,
@@ -550,7 +895,7 @@ def write(path, content):
 
 def sitemap():
     urls = []
-    for page in ("home", "hw"):
+    for page in PAGES:
         for lang in LANG_ORDER:
             alts = "".join(
                 f'<xhtml:link rel="alternate" hreflang="{l}" href="{SITE_URL}{path_for(l, page)}"/>'
@@ -569,13 +914,15 @@ def main():
     for lang in LANG_ORDER:
         write(path_for(lang, "home"), home_page(lang))
         write(path_for(lang, "hw"), hw_page(lang))
+        write(path_for(lang, "size"), size_page(lang))
+        write(path_for(lang, "help"), help_page(lang))
     write("/sitemap.xml", sitemap())
     write("/robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
     if os.path.isdir("static"):
         shutil.copytree("static", "dist", dirs_exist_ok=True)
     if GOOGLE_VERIFICATION_FILE:
         write("/" + GOOGLE_VERIFICATION_FILE, "google-site-verification: " + GOOGLE_VERIFICATION_FILE)
-    pages = len(LANG_ORDER) * 2
+    pages = len(LANG_ORDER) * len(PAGES)
     print(f"Built {pages} pages in ./dist")
     if "example.com" in SITE_URL:
         print("WARNING: SITE_URL is still example.com - set your domain before deploying.")

@@ -1,0 +1,35 @@
+{
+  "featured": "gta-6",
+  "games": [
+    {
+      "slug": "gta-6",
+      "name": "GTA 6",
+      "release_date": "2026-11-19",
+      "platforms": ["PS5", "Xbox Series X|S"],
+      "unlock": {
+        "mode": "local_midnight",
+        "local": "2026-11-19T00:00:00",
+        "utc": null
+      },
+      "storage_gb": 212,
+      "facts_checked": "2026-11-19",
+      "sources": [
+        {
+          "key": "rockstar_preload",
+          "title": "Rockstar Games Support: Grand Theft Auto VI Pre-Load FAQ",
+          "url": "https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq"
+        },
+        {
+          "key": "rockstar_platforms",
+          "title": "Rockstar Games Support: Grand Theft Auto VI Platforms, Editions, and Versions",
+          "url": "https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions"
+        },
+        {
+          "key": "playstation_blog",
+          "title": "PlayStation Blog: Pre-load Grand Theft Auto VI on PS5 starting today",
+          "url": "https://blog.playstation.com/2026/11/10/pre-load-grand-theft-auto-vi-on-ps5-starting-today/"
+        }
+      ]
+    }
+  ]
+}

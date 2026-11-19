@@ -1,6 +1,6 @@
 # DropClock: multilingual launch site
 
-16 static pages: a countdown/unlock-time page and a PS5 storage buyer's guide in
+32 static pages (four per language): a countdown/unlock-time page, a storage-size page, a download-help page and a PS5 storage buyer's guide in
 English (root, aimed at UAE), German, French, Spanish, Italian, Polish, Dutch and
 Arabic (RTL). No server, no dependencies beyond Python 3.
 
@@ -30,13 +30,26 @@ amazon.de, .fr, .es, .it, .nl, .pl, .com, .co.uk and .ca in the account.
 Each guide page carries the affiliate disclosure Amazon and EU rules expect.
 Do not remove it.
 
-## When Rockstar announces one official unlock time
+## Game data: games.json
 
-Set `UNLOCK_UTC` in `build.py` (e.g. `"2026-11-19T05:00:00Z"`), run
-`python3 build.py`, and re-upload. The banner switches to "official" and the city
-table shows real local times. Until then the site clearly says the time is
-unconfirmed and assumes local midnight. Do not claim a specific time before it is
-confirmed.
+Everything about the featured game lives in `games.json`: name, release date,
+unlock rule, storage size, the date the facts were last checked, and the official
+sources shown at the bottom of each page. The page text uses placeholders
+(`{game}`, `{date}`, `{size}`), so changing the data updates all eight languages.
+
+- **Facts change?** Edit `games.json` (for example `storage_gb`, or `facts_checked`
+  after you re-verify), run `python3 build.py`, push.
+- **One official unlock time announced?** Set `unlock.utc` (e.g. `"2026-11-19T05:00:00Z"`).
+  The banner switches to "official" and the city table shows real local times.
+- **Every claim on the size and help pages comes from a source listed in
+  `games.json`.** Do not add a claim without one.
+
+### Adding another game later
+
+Add an entry to `games` and set `featured` to its slug. Copy that does not depend on the
+game is reused automatically. The launch note and the help checklist are written for
+PS5 and Xbox pre-loads and Rockstar's rules, so review `note` and `help_*` in `build.py`
+(`T2`) for each new game before publishing it.
 
 ## Before you promote it
 
