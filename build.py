@@ -40,8 +40,8 @@ with open("games.json", encoding="utf-8") as _f:
 GAME = next(g for g in DATA["games"] if g["slug"] == DATA["featured"])
 UNLOCK_UTC = GAME["unlock"].get("utc")        # set to e.g. "2026-11-19T05:00:00Z" once one official time exists
 TARGET_LOCAL = GAME["unlock"]["local"]
-SRC = {x["key"]: x for x in GAME["sources"]}
-PAGES = ("home", "hw", "size", "help")
+SRC = {x["key"]: x for x in GAME["sources"] + DATA.get("sources", [])}
+PAGES = ("home", "hw", "size", "help", "ext")
 
 LANG_ORDER = ["en", "de", "fr", "es", "it", "pl", "nl", "ar"]
 STORE = {
@@ -542,7 +542,200 @@ T2 = {
 }
 
 
+
+# Copy for the post-launch subtitle and the external-vs-internal PS5 storage guide.
+# Every factual line comes from Sony's USB extended storage page and M.2 install page.
+T3 = {
+    "en": dict(
+        released_sub="Check how much space you need, fix download problems, or add storage.",
+        ext_btn="External vs internal",
+        ext_title="External vs internal PS5 storage: which one do you need?",
+        ext_desc="A USB drive can store PS5 games but cannot run them. An M.2 SSD can. What Sony says about each, and which to pick.",
+        ext_h1="External vs internal PS5 storage",
+        ext_intro="Short answer: PS5 games you want to play have to be on the console's own storage or on an M.2 SSD. A USB drive can store them, not run them.",
+        ext_usb_h="USB extended storage",
+        ext_usb=["PS5 games can be stored on it, but not played from it. You copy a game back to console storage to play it.",
+                 "PS4 games can be played directly from it.",
+                 "The drive needs USB 5 Gbps (SuperSpeed) or faster and a capacity from 250 GB to 8 TB.",
+                 "It can't go through a USB hub, only one drive works at a time, and Sony says not every device is guaranteed to work."],
+        ext_m2_h="Internal M.2 SSD",
+        ext_m2=["PS5 games can be installed on it and played from it.",
+                "It must be a PCIe Gen4 x4 NVMe SSD (Key M). SATA M.2 drives are not supported.",
+                "Capacity from 250 GB to 8 TB. Sony recommends a read speed of 5,500 MB/s or faster.",
+                "It needs a heatsink. Don't add one to a drive that already has one built in.",
+                "The size limits include the heatsink: up to 25 mm wide and 11.25 mm thick. If the slot cover won't close, the cooler is probably too big."],
+        ext_pick_h="Which should you pick?",
+        ext_pick=["Want to play more big games without deleting any? Add an M.2 SSD.",
+                  "Just want to keep finished games so you don't re-download them? A USB drive does that.",
+                  "Playing PS4 games? A USB drive can run them."],
+    ),
+    "de": dict(
+        released_sub="Prüfe, wie viel Speicher du brauchst, behebe Download-Probleme oder erweitere den Speicher.",
+        ext_btn="Extern oder intern",
+        ext_title="Externer oder interner PS5-Speicher: was brauchst du?",
+        ext_desc="Ein USB-Laufwerk kann PS5-Spiele speichern, aber nicht ausführen. Eine M.2-SSD kann beides. Was Sony zu beiden sagt und was du wählen solltest.",
+        ext_h1="Externer oder interner PS5-Speicher",
+        ext_intro="Kurz gesagt: PS5-Spiele, die du spielen willst, müssen auf dem Speicher der Konsole oder einer M.2-SSD liegen. Ein USB-Laufwerk kann sie speichern, aber nicht ausführen.",
+        ext_usb_h="Erweiterter USB-Speicher",
+        ext_usb=["PS5-Spiele lassen sich darauf speichern, aber nicht davon spielen. Zum Spielen kopierst du das Spiel zurück auf den Konsolenspeicher.",
+                 "PS4-Spiele können direkt davon gespielt werden.",
+                 "Das Laufwerk braucht USB mit 5 Gbit/s (SuperSpeed) oder schneller und eine Kapazität von 250 GB bis 8 TB.",
+                 "Es darf nicht über einen USB-Hub angeschlossen werden, es funktioniert nur ein Laufwerk gleichzeitig, und laut Sony ist nicht jedes Gerät garantiert kompatibel."],
+        ext_m2_h="Interne M.2-SSD",
+        ext_m2=["PS5-Spiele lassen sich darauf installieren und davon spielen.",
+                "Es muss eine PCIe-Gen4-x4-NVMe-SSD (Key M) sein. M.2-SSDs mit SATA werden nicht unterstützt.",
+                "Kapazität von 250 GB bis 8 TB. Sony empfiehlt eine Lesegeschwindigkeit von 5.500 MB/s oder mehr.",
+                "Ein Kühlkörper ist nötig. Bringe keinen zusätzlichen an, wenn die SSD bereits einen eingebauten hat.",
+                "Die Größenvorgaben gelten inklusive Kühlkörper: bis zu 25 mm breit und 11,25 mm dick. Lässt sich die Abdeckung nicht schließen, ist der Kühler vermutlich zu groß."],
+        ext_pick_h="Was solltest du wählen?",
+        ext_pick=["Du willst mehr große Spiele spielen, ohne welche zu löschen? Nimm eine M.2-SSD.",
+                  "Du willst nur fertige Spiele behalten, damit du sie nicht neu laden musst? Das kann ein USB-Laufwerk.",
+                  "Du spielst PS4-Spiele? Ein USB-Laufwerk kann sie ausführen."],
+    ),
+    "fr": dict(
+        released_sub="Vérifie l'espace dont tu as besoin, règle les problèmes de téléchargement ou ajoute du stockage.",
+        ext_btn="Externe ou interne",
+        ext_title="Stockage PS5 externe ou interne : lequel te faut-il ?",
+        ext_desc="Un disque USB peut stocker des jeux PS5 mais pas les lancer. Un SSD M.2 peut faire les deux. Ce que dit Sony de chacun et lequel choisir.",
+        ext_h1="Stockage PS5 externe ou interne",
+        ext_intro="En bref : les jeux PS5 auxquels tu veux jouer doivent se trouver sur le stockage de la console ou sur un SSD M.2. Un disque USB peut les stocker, pas les exécuter.",
+        ext_usb_h="Stockage USB étendu",
+        ext_usb=["Les jeux PS5 peuvent y être stockés, mais pas lancés depuis ce disque. Pour y jouer, tu les recopies sur le stockage de la console.",
+                 "Les jeux PS4 peuvent être lancés directement depuis ce disque.",
+                 "Le disque doit être en USB 5 Gbit/s (SuperSpeed) ou plus rapide, avec une capacité de 250 Go à 8 To.",
+                 "Il ne peut pas passer par un hub USB, un seul disque fonctionne à la fois, et Sony précise que tous les appareils ne sont pas garantis."],
+        ext_m2_h="SSD M.2 interne",
+        ext_m2=["Les jeux PS5 peuvent y être installés et lancés depuis ce SSD.",
+                "Il doit s'agir d'un SSD NVMe PCIe Gen4 x4 (Key M). Les SSD M.2 SATA ne sont pas pris en charge.",
+                "Capacité de 250 Go à 8 To. Sony recommande une vitesse de lecture de 5 500 Mo/s ou plus.",
+                "Un dissipateur thermique est nécessaire. N'en ajoute pas un si le SSD en a déjà un intégré.",
+                "Les limites de taille incluent le dissipateur : jusqu'à 25 mm de large et 11,25 mm d'épaisseur. Si le cache de l'emplacement ne se ferme pas, le refroidisseur est probablement trop grand."],
+        ext_pick_h="Que choisir ?",
+        ext_pick=["Tu veux jouer à plus de gros jeux sans en supprimer ? Prends un SSD M.2.",
+                  "Tu veux seulement garder tes jeux terminés pour ne pas les retélécharger ? Un disque USB suffit.",
+                  "Tu joues à des jeux PS4 ? Un disque USB peut les lancer."],
+    ),
+    "es": dict(
+        released_sub="Comprueba cuánto espacio necesitas, soluciona problemas de descarga o amplía el almacenamiento.",
+        ext_btn="Externo o interno",
+        ext_title="Almacenamiento externo o interno en PS5: ¿cuál necesitas?",
+        ext_desc="Un disco USB puede guardar juegos de PS5, pero no ejecutarlos. Un SSD M.2 puede hacer ambas cosas. Lo que dice Sony de cada uno y cuál elegir.",
+        ext_h1="Almacenamiento externo o interno en PS5",
+        ext_intro="En resumen: los juegos de PS5 a los que quieras jugar tienen que estar en el almacenamiento de la consola o en un SSD M.2. Un disco USB puede guardarlos, no ejecutarlos.",
+        ext_usb_h="Almacenamiento USB ampliado",
+        ext_usb=["Los juegos de PS5 se pueden guardar en él, pero no jugar desde él. Para jugar, los copias de vuelta al almacenamiento de la consola.",
+                 "Los juegos de PS4 se pueden jugar directamente desde él.",
+                 "El disco necesita USB de 5 Gbps (SuperSpeed) o más rápido y una capacidad de 250 GB a 8 TB.",
+                 "No puede conectarse a través de un hub USB, solo funciona un disco a la vez, y Sony indica que no se garantiza que todos los dispositivos funcionen."],
+        ext_m2_h="SSD M.2 interno",
+        ext_m2=["Los juegos de PS5 se pueden instalar en él y jugar desde él.",
+                "Debe ser un SSD NVMe PCIe Gen4 x4 (Key M). Los SSD M.2 SATA no son compatibles.",
+                "Capacidad de 250 GB a 8 TB. Sony recomienda una velocidad de lectura de 5.500 MB/s o más.",
+                "Necesita un disipador. No añadas otro si el SSD ya lo trae integrado.",
+                "Los límites de tamaño incluyen el disipador: hasta 25 mm de ancho y 11,25 mm de grosor. Si la tapa de la ranura no cierra, el disipador probablemente es demasiado grande."],
+        ext_pick_h="¿Cuál elegir?",
+        ext_pick=["¿Quieres jugar a más juegos grandes sin borrar ninguno? Elige un SSD M.2.",
+                  "¿Solo quieres conservar juegos terminados para no volver a descargarlos? Un disco USB sirve.",
+                  "¿Juegas a juegos de PS4? Un disco USB puede ejecutarlos."],
+    ),
+    "it": dict(
+        released_sub="Controlla quanto spazio ti serve, risolvi i problemi di download o aggiungi memoria.",
+        ext_btn="Esterna o interna",
+        ext_title="Memoria PS5 esterna o interna: quale ti serve?",
+        ext_desc="Un disco USB può archiviare i giochi PS5 ma non eseguirli. Un SSD M.2 può fare entrambe le cose. Cosa dice Sony di ciascuno e quale scegliere.",
+        ext_h1="Memoria PS5 esterna o interna",
+        ext_intro="In breve: i giochi PS5 a cui vuoi giocare devono stare nella memoria della console o su un SSD M.2. Un disco USB può archiviarli, non eseguirli.",
+        ext_usb_h="Archiviazione USB estesa",
+        ext_usb=["I giochi PS5 possono essere archiviati lì, ma non giocati da lì. Per giocare, li copi di nuovo nella memoria della console.",
+                 "I giochi PS4 si possono giocare direttamente dal disco.",
+                 "Il disco richiede USB da 5 Gbps (SuperSpeed) o più veloce e una capacità da 250 GB a 8 TB.",
+                 "Non può essere collegato tramite hub USB, funziona un solo disco alla volta e Sony precisa che non tutti i dispositivi sono garantiti."],
+        ext_m2_h="SSD M.2 interno",
+        ext_m2=["I giochi PS5 si possono installare e giocare da questo SSD.",
+                "Deve essere un SSD NVMe PCIe Gen4 x4 (Key M). Gli SSD M.2 SATA non sono supportati.",
+                "Capacità da 250 GB a 8 TB. Sony consiglia una velocità di lettura di 5.500 MB/s o superiore.",
+                "Serve un dissipatore. Non aggiungerne uno se l'SSD ne ha già uno integrato.",
+                "I limiti di dimensione includono il dissipatore: fino a 25 mm di larghezza e 11,25 mm di spessore. Se il coperchio dello slot non si chiude, il dissipatore è probabilmente troppo grande."],
+        ext_pick_h="Cosa scegliere?",
+        ext_pick=["Vuoi giocare a più giochi pesanti senza cancellarne nessuno? Scegli un SSD M.2.",
+                  "Vuoi solo conservare i giochi finiti per non riscaricarli? Basta un disco USB.",
+                  "Giochi a titoli PS4? Un disco USB può eseguirli."],
+    ),
+    "pl": dict(
+        released_sub="Sprawdź, ile miejsca potrzebujesz, napraw problemy z pobieraniem albo dodaj pamięć.",
+        ext_btn="Zewnętrzna czy wewnętrzna",
+        ext_title="Zewnętrzna czy wewnętrzna pamięć PS5: której potrzebujesz?",
+        ext_desc="Dysk USB może przechowywać gry na PS5, ale nie można ich z niego uruchamiać. Dysk M.2 SSD może jedno i drugie. Co mówi Sony o każdym z nich i co wybrać.",
+        ext_h1="Zewnętrzna czy wewnętrzna pamięć PS5",
+        ext_intro="W skrócie: gry na PS5, w które chcesz grać, muszą być w pamięci konsoli lub na dysku M.2 SSD. Dysk USB może je przechowywać, ale nie uruchamiać.",
+        ext_usb_h="Rozszerzona pamięć USB",
+        ext_usb=["Gry na PS5 można na nim przechowywać, ale nie można z niego grać. Aby zagrać, kopiujesz grę z powrotem do pamięci konsoli.",
+                 "Gry z PS4 można uruchamiać bezpośrednio z dysku.",
+                 "Dysk musi mieć USB 5 Gb/s (SuperSpeed) lub szybsze i pojemność od 250 GB do 8 TB.",
+                 "Nie można go podłączyć przez hub USB, działa tylko jeden dysk naraz, a Sony zastrzega, że nie każde urządzenie jest gwarantowane."],
+        ext_m2_h="Wewnętrzny dysk M.2 SSD",
+        ext_m2=["Gry na PS5 można na nim instalować i z niego uruchamiać.",
+                "Musi to być dysk NVMe PCIe Gen4 x4 (Key M). Dyski M.2 SATA nie są obsługiwane.",
+                "Pojemność od 250 GB do 8 TB. Sony zaleca prędkość odczytu 5500 MB/s lub wyższą.",
+                "Potrzebny jest radiator. Nie dodawaj kolejnego, jeśli dysk ma już wbudowany.",
+                "Limity rozmiaru obejmują radiator: do 25 mm szerokości i 11,25 mm grubości. Jeśli pokrywa gniazda się nie zamyka, radiator jest prawdopodobnie za duży."],
+        ext_pick_h="Co wybrać?",
+        ext_pick=["Chcesz grać w więcej dużych gier bez usuwania żadnej? Wybierz dysk M.2 SSD.",
+                  "Chcesz tylko zachować ukończone gry, żeby nie pobierać ich ponownie? Wystarczy dysk USB.",
+                  "Grasz w gry z PS4? Dysk USB może je uruchamiać."],
+    ),
+    "nl": dict(
+        released_sub="Bekijk hoeveel ruimte je nodig hebt, los downloadproblemen op of voeg opslag toe.",
+        ext_btn="Extern of intern",
+        ext_title="Externe of interne PS5-opslag: wat heb je nodig?",
+        ext_desc="Een USB-schijf kan PS5-games opslaan, maar niet afspelen. Een M.2-SSD kan beide. Wat Sony over elk zegt en wat je kunt kiezen.",
+        ext_h1="Externe of interne PS5-opslag",
+        ext_intro="Kort gezegd: PS5-games die je wilt spelen moeten op de opslag van de console of op een M.2-SSD staan. Een USB-schijf kan ze opslaan, maar niet draaien.",
+        ext_usb_h="USB-uitbreidingsopslag",
+        ext_usb=["PS5-games kunnen erop worden opgeslagen, maar je kunt ze er niet vanaf spelen. Om te spelen kopieer je een game terug naar de opslag van de console.",
+                 "PS4-games kun je rechtstreeks ervan spelen.",
+                 "De schijf heeft USB met 5 Gbps (SuperSpeed) of sneller nodig en een capaciteit van 250 GB tot 8 TB.",
+                 "Hij mag niet via een USB-hub worden aangesloten, er werkt maar één schijf tegelijk en Sony zegt dat niet elk apparaat gegarandeerd werkt."],
+        ext_m2_h="Interne M.2-SSD",
+        ext_m2=["PS5-games kunnen erop worden geïnstalleerd en ervan gespeeld.",
+                "Het moet een PCIe Gen4 x4 NVMe-SSD (Key M) zijn. SATA M.2-schijven worden niet ondersteund.",
+                "Capaciteit van 250 GB tot 8 TB. Sony adviseert een leessnelheid van 5.500 MB/s of hoger.",
+                "Een heatsink is nodig. Voeg er geen toe als de SSD er al een heeft ingebouwd.",
+                "De maatlimieten gelden inclusief heatsink: maximaal 25 mm breed en 11,25 mm dik. Sluit het klepje van de sleuf niet, dan is de koeler waarschijnlijk te groot."],
+        ext_pick_h="Wat kies je?",
+        ext_pick=["Wil je meer grote games spelen zonder er een te verwijderen? Kies een M.2-SSD.",
+                  "Wil je alleen uitgespeelde games bewaren zodat je ze niet opnieuw hoeft te downloaden? Dat kan een USB-schijf.",
+                  "Speel je PS4-games? Een USB-schijf kan ze draaien."],
+    ),
+    "ar": dict(
+        released_sub="تحقق من المساحة التي تحتاجها، أو أصلح مشكلات التنزيل، أو أضف مساحة تخزين.",
+        ext_btn="خارجي أم داخلي",
+        ext_title="تخزين PS5 الخارجي أم الداخلي: أيهما تحتاج؟",
+        ext_desc="يمكن لقرص USB تخزين ألعاب PS5 لكن لا يمكن تشغيلها منه. أما قرص M.2 SSD فيفعل الاثنين. ما تقوله Sony عن كل منهما وأيهما تختار.",
+        ext_h1="تخزين PS5 الخارجي أم الداخلي",
+        ext_intro="باختصار: يجب أن تكون ألعاب PS5 التي تريد لعبها على مساحة تخزين الجهاز أو على قرص M.2 SSD. يمكن لقرص USB تخزينها لكن لا يمكنه تشغيلها.",
+        ext_usb_h="تخزين USB الموسّع",
+        ext_usb=["يمكن تخزين ألعاب PS5 عليه لكن لا يمكن اللعب منه. للعب تنسخ اللعبة إلى مساحة تخزين الجهاز.",
+                 "يمكن تشغيل ألعاب PS4 مباشرة منه.",
+                 "يحتاج القرص إلى USB بسرعة 5 غيغابت/ثانية (SuperSpeed) أو أسرع وسعة من 250 غيغابايت إلى 8 تيرابايت.",
+                 "لا يمكن توصيله عبر موزّع USB، ولا يعمل سوى قرص واحد في كل مرة، وتذكر Sony أن عمل كل الأجهزة غير مضمون."],
+        ext_m2_h="قرص M.2 SSD الداخلي",
+        ext_m2=["يمكن تثبيت ألعاب PS5 عليه واللعب منه.",
+                "يجب أن يكون قرص NVMe بواجهة PCIe Gen4 x4 (Key M). أقراص M.2 من نوع SATA غير مدعومة.",
+                "السعة من 250 غيغابايت إلى 8 تيرابايت. توصي Sony بسرعة قراءة 5500 ميغابايت/ثانية أو أكثر.",
+                "يلزم وجود مبرّد حراري. لا تضف مبرّدًا آخر إذا كان القرص مزودًا بمبرّد مدمج.",
+                "حدود الحجم تشمل المبرّد: بعرض يصل إلى 25 مم وسماكة تصل إلى 11.25 مم. إذا لم يُغلق غطاء الفتحة فالمبرّد على الأرجح كبير جدًا."],
+        ext_pick_h="ماذا تختار؟",
+        ext_pick=["هل تريد لعب المزيد من الألعاب الكبيرة دون حذف أي منها؟ اختر قرص M.2 SSD.",
+                  "هل تريد فقط الاحتفاظ بالألعاب المنتهية لتجنب إعادة تنزيلها؟ يكفي قرص USB.",
+                  "هل تلعب ألعاب PS4؟ يمكن لقرص USB تشغيلها."],
+    ),
+}
+
+
 for _lang, _extra in T2.items():
+    T[_lang].update(_extra)
+for _lang, _extra in T3.items():
     T[_lang].update(_extra)
 
 
@@ -608,7 +801,6 @@ html[lang=ar] h1,html[lang=ar] .brand,html[lang=ar] .cd b,html[lang=ar] .out{fon
 .cd div+div{border-inline-start:1px solid var(--line)}
 .cd b{display:block;font:italic 900 clamp(2rem,9vw,3.4rem)/1.05 "Arial Black","Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#ffe38a,#ff4f8b);-webkit-background-clip:text;background-clip:text;color:transparent}
 .cd span{color:var(--mut);font-size:.85rem}
-.out{font:italic 900 2rem/1.2 "Arial Black","Helvetica Neue",Arial,sans-serif;text-align:center;margin:26px 0}
 table{width:100%;border-collapse:collapse;margin:14px 0 26px}
 th,td{padding:11px 8px;border-bottom:1px solid var(--line);text-align:start}
 th{color:var(--teal);font-weight:600;font-size:.9rem}
@@ -631,6 +823,8 @@ def path_for(lang, page):
         return base
     if page == "hw":
         return f"{base}ps5-storage/"
+    if page == "ext":
+        return f"{base}ps5-storage/external-vs-internal/"
     if page == "size":
         return f"{base}{GAME['slug']}/storage/"
     return f"{base}{GAME['slug']}/help/"
@@ -744,10 +938,28 @@ def size_page(lang):
 <ul class="specs">{pts}</ul>
 <h2>{escape(t["size_next_h"])}</h2>
 <p>{escape(t["size_next"])}</p>
-<div class="btns"><a class="btn" href="{path_for(lang, "hw")}">{escape(t["nav_hw"])}</a></div>
+<div class="btns"><a class="btn" href="{path_for(lang, "hw")}">{escape(t["nav_hw"])}</a> <a class="btn" href="{path_for(lang, "ext")}">{escape(t["ext_btn"])}</a></div>
 {sources_block(lang, ["rockstar_preload", "rockstar_platforms"])}
 """
     return layout(lang, "size", t["size_title"], t["size_desc"], body)
+
+
+def ext_page(lang):
+    t = T[lang]
+    li = lambda k: "".join(f"<li>{escape(x)}</li>" for x in t[k])
+    body = f"""
+<h1>{escape(t["ext_h1"])}</h1>
+<p class="sub">{escape(t["ext_intro"])}</p>
+<h2>{escape(t["ext_usb_h"])}</h2>
+<ul class="specs">{li("ext_usb")}</ul>
+<h2>{escape(t["ext_m2_h"])}</h2>
+<ul class="specs">{li("ext_m2")}</ul>
+<h2>{escape(t["ext_pick_h"])}</h2>
+<ul class="specs">{li("ext_pick")}</ul>
+<div class="btns"><a class="btn" href="{path_for(lang, "hw")}">{escape(t["nav_hw"])}</a></div>
+{sources_block(lang, ["sony_usb", "sony_m2"])}
+"""
+    return layout(lang, "ext", t["ext_title"], t["ext_desc"], body)
 
 
 def help_page(lang):
@@ -777,17 +989,16 @@ def home_page(lang):
         for name, tz in zip(t["cities"], CITY_TZ)
     )
     body = f"""
-<h1>{escape(t["h1"])}</h1>
-<p class="sub">{escape(t["sub"])}</p>
+<h1 id="h1">{escape(t["h1"])}</h1>
+<p class="sub" id="sub">{escape(t["sub"])}</p>
 <div class="note">{escape(status)}</div>
-<div class="cd" id="cd">{cd}</div>
-<div class="out" id="out" hidden>{escape(t["released"])}</div>
+<div class="cd" id="cd" hidden>{cd}</div>
 <div class="btns">
 <a class="btn" href="{path_for(lang, "size")}">{escape(t["nav_size"])}</a>
 <a class="btn" href="{path_for(lang, "help")}">{escape(t["nav_help"])}</a>
 <a class="btn" href="{path_for(lang, "hw")}">{escape(t["nav_hw"])}</a>
 </div>
-<p class="small">{escape(t["local"])}: <b id="mine">{escape(t["assumed_cell"])}</b> &middot; {escape(t["tzlabel"])}: <span id="tz">-</span></p>
+<p class="small" id="mytz" hidden>{escape(t["local"])}: <b id="mine">{escape(t["assumed_cell"])}</b> &middot; {escape(t["tzlabel"])}: <span id="tz">-</span></p>
 <table>
 <thead><tr><th>{escape(t["col_city"])}</th><th>{escape(t["col_time"])}</th></tr></thead>
 <tbody>{rows}</tbody>
@@ -798,6 +1009,8 @@ def home_page(lang):
         "unlock_utc": UNLOCK_UTC,
         "target_local": TARGET_LOCAL,
         "locale": lang,
+        "released": t["released"],
+        "released_sub": t["released_sub"],
     })
     script = "<script>window.__CFG=" + cfg + ";" + COUNTDOWN_JS + "</script>"
     return layout(lang, "home", t["title"], t["desc"], body, script)
@@ -825,7 +1038,9 @@ def hw_page(lang):
 <h2>{escape(t["specs_h"])}</h2>
 <ul class="specs">{specs}</ul>
 <p>{escape(t["xbox"])}</p>
+<div class="btns"><a class="btn" href="{path_for(lang, "ext")}">{escape(t["ext_btn"])}</a></div>
 {buy_block}
+{sources_block(lang, ["sony_usb", "sony_m2"])}
 """
     script = ""
     if lang == "en" and buy_block:
@@ -856,7 +1071,7 @@ var C=window.__CFG;
 var target=C.unlock_utc?Date.parse(C.unlock_utc):new Date(C.target_local).getTime();
 function p(n){return n<10?"0"+n:""+n;}
 function $(id){return document.getElementById(id);}
-try{$("tz").textContent=Intl.DateTimeFormat().resolvedOptions().timeZone;}catch(e){}
+try{$("tz").textContent=Intl.DateTimeFormat().resolvedOptions().timeZone;$("mytz").hidden=false;}catch(e){}
 function fmt(tz){
   try{
     var o={dateStyle:"medium",timeStyle:"short"};
@@ -871,7 +1086,8 @@ if(C.unlock_utc){
 }
 function tick(){
   var d=target-Date.now();
-  if(d<=0){$("cd").hidden=true;$("out").hidden=false;return;}
+  if(d<=0){$("h1").textContent=C.released;$("sub").textContent=C.released_sub;$("cd").hidden=true;return;}
+  $("cd").hidden=false;
   var s=Math.floor(d/1000);
   var days=Math.floor(s/86400);s-=days*86400;
   var h=Math.floor(s/3600);s-=h*3600;
@@ -916,6 +1132,7 @@ def main():
         write(path_for(lang, "hw"), hw_page(lang))
         write(path_for(lang, "size"), size_page(lang))
         write(path_for(lang, "help"), help_page(lang))
+        write(path_for(lang, "ext"), ext_page(lang))
     write("/sitemap.xml", sitemap())
     write("/robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
     if os.path.isdir("static"):

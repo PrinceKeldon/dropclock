@@ -5,7 +5,10 @@
       "slug": "gta-6",
       "name": "GTA 6",
       "release_date": "2026-11-19",
-      "platforms": ["PS5", "Xbox Series X|S"],
+      "platforms": [
+        "PS5",
+        "Xbox Series X|S"
+      ],
       "unlock": {
         "mode": "local_midnight",
         "local": "2026-11-19T00:00:00",
@@ -30,6 +33,18 @@
           "url": "https://blog.playstation.com/2026/11/10/pre-load-grand-theft-auto-vi-on-ps5-starting-today/"
         }
       ]
+    }
+  ],
+  "sources": [
+    {
+      "key": "sony_usb",
+      "title": "Sony: USB extended storage on PlayStation 5 consoles",
+      "url": "https://www.playstation.com/en-us/support/hardware/ps5-extended-storage/"
+    },
+    {
+      "key": "sony_m2",
+      "title": "Sony: How to add an M.2 SSD to a PS5 console",
+      "url": "https://www.playstation.com/en-us/support/hardware/ps5-install-m2-ssd/"
     }
   ]
 }
