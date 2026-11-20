@@ -1150,7 +1150,7 @@ def main():
         write(path_for(lang, "ext"), ext_page(lang))
     write(path_for("en", "kit"), kit_page())
     write("/sitemap.xml", sitemap())
-    write("/robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
+    write("/robots.txt", f"User-agent: *\nAllow: /\nDisallow: /creator-kit/_x7k2p9/\nSitemap: {SITE_URL}/sitemap.xml\n")
     if os.path.isdir("static"):
         shutil.copytree("static", "dist", dirs_exist_ok=True)
     if GOOGLE_VERIFICATION_FILE:
