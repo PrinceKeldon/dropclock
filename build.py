@@ -807,6 +807,9 @@ th{color:var(--teal);font-weight:600;font-size:.9rem}
 tbody tr:last-child td{border-bottom:0}
 ul.specs{padding-inline-start:20px}
 ul.specs li{margin:8px 0}
+.kitgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;margin:22px 0}
+.kit{margin:0}.kit img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block}
+.kit figcaption{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:10px}
 .btns{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
 .btn{display:inline-block;background:linear-gradient(90deg,var(--flamingo),var(--orange));color:#1c0626;text-decoration:none;padding:12px 18px;border-radius:999px;font-weight:800;transition:transform .15s,box-shadow .15s}
 .btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,79,139,.35)}
@@ -823,6 +826,8 @@ def path_for(lang, page):
         return base
     if page == "hw":
         return f"{base}ps5-storage/"
+    if page == "kit":
+        return "/creator-kit/"
     if page == "ext":
         return f"{base}ps5-storage/external-vs-internal/"
     if page == "size":
@@ -865,12 +870,13 @@ def hero(page):
 def layout(lang, page, title, desc, body, script=""):
     t = T[lang]
     direction = "rtl" if lang == "ar" else "ltr"
+    page_langs = ["en"] if page == "kit" else LANG_ORDER
     alts = "".join(
         f'<link rel="alternate" hreflang="{l}" href="{SITE_URL}{path_for(l, page)}">'
-        for l in LANG_ORDER
+        for l in page_langs
     )
     alts += f'<link rel="alternate" hreflang="x-default" href="{SITE_URL}{path_for("en", page)}">'
-    langs = "".join(
+    langs = "" if page == "kit" else "".join(
         f'<a href="{path_for(l, page)}" hreflang="{l}"{" class=on" if l == lang else ""}>{NATIVE[l]}</a>'
         for l in LANG_ORDER
     )
@@ -897,7 +903,7 @@ def layout(lang, page, title, desc, body, script=""):
 <meta property="og:type" content="website">
 <meta property="og:url" content="{canonical}">
 <meta property="og:site_name" content="{BRAND}">
-<meta property="og:image" content="{SITE_URL}/og.png">
+<meta property="og:image" content="{SITE_URL}{"/creator-kit/sunset-strip-preview.png" if page == "kit" else "/og.png"}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -960,6 +966,38 @@ def ext_page(lang):
 {sources_block(lang, ["sony_usb", "sony_m2"])}
 """
     return layout(lang, "ext", t["ext_title"], t["ext_desc"], body)
+
+
+KIT_ITEMS = [
+    ("sunset-strip", "Challenge", "Can I survive 24 hours?"),
+    ("night-drive", "Reaction", "First drive impressions"),
+    ("skyline-heat", "Secrets", "Every secret location"),
+    ("chase-lights", "News", "Update: what we know"),
+]
+
+
+def kit_page():
+    cards = "".join(
+        f'<figure class="kit"><img src="/creator-kit/{k}-preview.png" width="1280" height="720" loading="lazy" '
+        f'alt="Thumbnail preview: {escape(title)}"><figcaption><b>{escape(cat)}</b> '
+        f'<a class="btn" href="/creator-kit/{k}.png" download>Download text-free background</a></figcaption></figure>'
+        for k, cat, title in KIT_ITEMS
+    )
+    body = f"""
+<h1>Free thumbnail backgrounds for open-world crime game creators</h1>
+<p class="sub">Four original 1280x720 backgrounds in a neon-sunset style, with room for your title. Free to use on your own videos, streams and posts.</p>
+<div class="kitgrid">{cards}</div>
+<h2>Terms</h2>
+<ul class="specs">
+<li>Use them in thumbnails and channel art for your own content, including monetised videos.</li>
+<li>Don't resell, redistribute or re-upload the files as a pack.</li>
+<li>They are original artwork. They contain no game artwork, logos or characters, and they are not affiliated with or endorsed by Rockstar Games or any game publisher.</li>
+</ul>
+<h2>The full kit</h2>
+<p>A larger pack is in the works: more thumbnail templates, channel banners, stream screens and Shorts templates in the same style. It isn't on sale yet.</p>
+<p class="small">The sample images show placeholder titles. The downloads have no text, so add your own in any editor.</p>
+"""
+    return layout("en", "kit", "Free thumbnail backgrounds for crime game creators", "Four free neon-sunset thumbnail backgrounds, 1280x720, for open-world crime game videos and streams. Original artwork.", body)
 
 
 def help_page(lang):
@@ -1118,6 +1156,7 @@ def sitemap():
                 for l in LANG_ORDER
             )
             urls.append(f"<url><loc>{SITE_URL}{path_for(lang, page)}</loc>{alts}</url>")
+    urls.append(f"<url><loc>{SITE_URL}/creator-kit/</loc></url>")
     return (
         '<?xml version="1.0" encoding="UTF-8"?>'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'
@@ -1133,13 +1172,14 @@ def main():
         write(path_for(lang, "size"), size_page(lang))
         write(path_for(lang, "help"), help_page(lang))
         write(path_for(lang, "ext"), ext_page(lang))
+    write(path_for("en", "kit"), kit_page())
     write("/sitemap.xml", sitemap())
     write("/robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
     if os.path.isdir("static"):
         shutil.copytree("static", "dist", dirs_exist_ok=True)
     if GOOGLE_VERIFICATION_FILE:
         write("/" + GOOGLE_VERIFICATION_FILE, "google-site-verification: " + GOOGLE_VERIFICATION_FILE)
-    pages = len(LANG_ORDER) * len(PAGES)
+    pages = len(LANG_ORDER) * len(PAGES) + 1
     print(f"Built {pages} pages in ./dist")
     if "example.com" in SITE_URL:
         print("WARNING: SITE_URL is still example.com - set your domain before deploying.")
