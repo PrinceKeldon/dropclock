@@ -903,7 +903,7 @@ def layout(lang, page, title, desc, body, script=""):
 <meta property="og:type" content="website">
 <meta property="og:url" content="{canonical}">
 <meta property="og:site_name" content="{BRAND}">
-<meta property="og:image" content="{SITE_URL}{"/creator-kit/sunset-strip-preview.png" if page == "kit" else "/og.png"}">
+<meta property="og:image" content="{SITE_URL}{"/creator-kit/dusk-boulevard-preview.png" if page == "kit" else "/og.png"}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -969,10 +969,10 @@ def ext_page(lang):
 
 
 KIT_ITEMS = [
-    ("sunset-strip", "Challenge", "Can I survive 24 hours?"),
-    ("night-drive", "Reaction", "First drive impressions"),
-    ("skyline-heat", "Secrets", "Every secret location"),
-    ("chase-lights", "News", "Update: what we know"),
+    ("dusk-boulevard", "Challenge", "Can I survive 24 hours?"),
+    ("postcard", "Reaction", "Honest first look"),
+    ("rooftop-night", "Secrets", "Every secret location"),
+    ("spotlight", "News", "Update: what we know"),
 ]
 
 
@@ -985,7 +985,7 @@ def kit_page():
     )
     body = f"""
 <h1>Free thumbnail backgrounds for open-world crime game creators</h1>
-<p class="sub">Four original 1280x720 backgrounds in a neon-sunset style, with room for your title. Free to use on your own videos, streams and posts.</p>
+<p class="sub">Four original 1280x720 backgrounds in a Florida-dusk style, with room for your title. Free to use on your own videos, streams and posts.</p>
 <div class="kitgrid">{cards}</div>
 <h2>Terms</h2>
 <ul class="specs">
@@ -997,7 +997,7 @@ def kit_page():
 <p>A larger pack is in the works: more thumbnail templates, channel banners, stream screens and Shorts templates in the same style. It isn't on sale yet.</p>
 <p class="small">The sample images show placeholder titles. The downloads have no text, so add your own in any editor.</p>
 """
-    return layout("en", "kit", "Free thumbnail backgrounds for crime game creators", "Four free neon-sunset thumbnail backgrounds, 1280x720, for open-world crime game videos and streams. Original artwork.", body)
+    return layout("en", "kit", "Free thumbnail backgrounds for crime game creators", "Four free Florida-dusk thumbnail backgrounds, 1280x720, for open-world crime game videos and streams. Original artwork.", body)
 
 
 def help_page(lang):
